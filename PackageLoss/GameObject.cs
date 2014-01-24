@@ -64,6 +64,7 @@ namespace PackageLoss
             //Create a single body with multiple fixtures
             Compound = BodyFactory.CreateCompoundPolygon(world, list, 1f, BodyType.Dynamic);
             Compound.BodyType = BodyType.Dynamic;
+            Compound.Inertia = 100.0f;
         }
 
         public void Draw(SpriteBatch spriteBatch, Camera2D camera)
