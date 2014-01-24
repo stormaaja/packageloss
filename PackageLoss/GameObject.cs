@@ -69,7 +69,7 @@ namespace PackageLoss
         public void Draw(SpriteBatch spriteBatch, Camera2D camera)
         {
             gameScreen.Game.SpriteBatch.Begin(0, null, null, null, null, null, camera.View);
-            gameScreen.Game.SpriteBatch.Draw(polygonTexture, ConvertUnits.ToDisplayUnits(Compound.Position), null, Color.Tomato, Compound.Rotation, _origin, 1.0f, SpriteEffects.None, 0f);
+            gameScreen.Game.SpriteBatch.Draw(polygonTexture, ConvertUnits.ToDisplayUnits(Compound.Position), null, Color.White, Compound.Rotation, _origin, 1.0f, SpriteEffects.None, 0f);
             gameScreen.Game.SpriteBatch.End();
         }
     }

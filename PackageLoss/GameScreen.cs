@@ -56,7 +56,7 @@ namespace PackageLoss
             camera = new Camera2D(Game.GraphicsDevice);
             HiddenBody = BodyFactory.CreateBody(World, Vector2.Zero);
             //load texture that will represent the physics body
-            gameObjects.Add(new GameObject(this, Game.Content.Load<Texture2D>("object"), World));
+            gameObjects.Add(new GameObject(this, Game.Content.Load<Texture2D>("basketBall01"), World));
 
             
         }
