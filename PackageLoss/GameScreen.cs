@@ -20,6 +20,8 @@ namespace PackageLoss
         Vector2 moveDelta;
         protected World World;
         Body HiddenBody;
+        Texture2D background;
+        Rectangle bgRectangle;
         List<GameObject> gameObjects;
         
         Camera2D camera;
@@ -49,6 +51,8 @@ namespace PackageLoss
 
         public void LoadContent()
         {
+            bgRectangle = new Rectangle(0, 0, Game.Window.ClientBounds.Width, Game.Window.ClientBounds.Height);
+            background = Game.Content.Load<Texture2D>("background");
             gameObjects = new List<GameObject>();
             World = new World(Vector2.Zero);
             World.Gravity = Vector2.Zero;
@@ -63,6 +67,10 @@ namespace PackageLoss
 
         public void Draw(GameTime gameTime)
         {
+            Game.SpriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.Opaque, SamplerState.LinearWrap, DepthStencilState.Default, RasterizerState.CullNone);
+            Game.SpriteBatch.Draw(background, Vector2.Zero, bgRectangle, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+            Game.SpriteBatch.End();
+
             foreach (GameObject gameObject in gameObjects)
             {
                 gameObject.Draw(Game.SpriteBatch, camera);
