@@ -55,7 +55,7 @@ namespace PackageLoss
             background = Game.Content.Load<Texture2D>("background");
             gameObjects = new List<GameObject>();
             World = new World(Vector2.Zero);
-            World.Gravity = new Vector2(0.0f, 1.0f);
+            World.Gravity = new Vector2(0.0f, 4.0f);
 
             camera = new Camera2D(Game.GraphicsDevice);
             HiddenBody = BodyFactory.CreateBody(World, Vector2.Zero);
