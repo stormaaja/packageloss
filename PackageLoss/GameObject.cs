@@ -25,6 +25,7 @@ namespace PackageLoss
         public GameObject(GameScreen gameScreen, Texture2D texture2D, World world)
         {
             this.world = world;
+            world.Gravity = new Vector2(0.0f, 1.0f);
             this.gameScreen = gameScreen;
             this.polygonTexture = texture2D;
             //Create an array to hold the data from the texture
