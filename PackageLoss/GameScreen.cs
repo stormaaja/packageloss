@@ -23,6 +23,9 @@ namespace PackageLoss
         Texture2D background;
         Rectangle bgRectangle;
         List<GameObject> gameObjects;
+        Body bottom;
+        Rectangle bottomRectangle;
+        Texture2D testTexture;
         
         Camera2D camera;
         public Game1 Game { get; set; }
@@ -60,9 +63,22 @@ namespace PackageLoss
             camera = new Camera2D(Game.GraphicsDevice);
             HiddenBody = BodyFactory.CreateBody(World, Vector2.Zero);
             //load texture that will represent the physics body
-            gameObjects.Add(new GameObject(this, Game.Content.Load<Texture2D>("basketBall01"), World));
+            GameObject go1 = new GameObject(this, Game.Content.Load<Texture2D>("basketBall01"), World);
+            go1.Compound.OnCollision += Compound_OnCollision;
+            gameObjects.Add(go1);
+            GameObject go2 = new GameObject(this, Game.Content.Load<Texture2D>("basketBall01"), World);
+            go2.Compound.OnCollision += Compound_OnCollision;
+            gameObjects.Add(go2);
+            testTexture = Game.Content.Load<Texture2D>("goo");
+            bottom = BodyFactory.CreateRectangle(World, Game.Window.ClientBounds.Width, 1.0f, 10.0f);
+            bottomRectangle = new Rectangle(0, 0, Game.Window.ClientBounds.Width, 10);
+            bottom.Position = new Vector2(-20.0f, 10.0f);
+            bottom.OnCollision += Compound_OnCollision;
+        }
 
-            
+        bool Compound_OnCollision(Fixture fixtureA, Fixture fixtureB, FarseerPhysics.Dynamics.Contacts.Contact contact)
+        {
+            return true;
         }
 
         public void Draw(GameTime gameTime)
@@ -75,12 +91,19 @@ namespace PackageLoss
             {
                 gameObject.Draw(Game.SpriteBatch, camera);
             }
+            Game.SpriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.Opaque, SamplerState.LinearWrap, DepthStencilState.Default, RasterizerState.CullNone, null, camera.View);
+            Game.SpriteBatch.Draw(testTexture, ConvertUnits.ToDisplayUnits(bottom.Position), bottomRectangle, Color.White, bottom.Rotation, Vector2.Zero, 1.0f, SpriteEffects.None, 0f);
+            Game.SpriteBatch.End();
         }
 
 
         internal void Update(GameTime gameTime)
         {
             World.Step(Math.Min((float)gameTime.ElapsedGameTime.TotalSeconds, (1f / 30f)));
+            foreach (GameObject gameObject in gameObjects)
+            {
+                gameObject.Update(gameTime);
+            }
             camera.Update(gameTime);
         }
 
@@ -105,6 +128,7 @@ namespace PackageLoss
                 else
                 {
                     movingObject.Compound.Position = mouseInWorld + moveDelta;
+                    movingObject.Compound.LinearVelocity = Vector2.Zero;
                 }
             }
 

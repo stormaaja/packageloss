@@ -22,7 +22,9 @@ namespace PackageLoss
 
         private Vector2 _origin;
 
-        public GameObject(GameScreen gameScreen, Texture2D texture2D, World world)
+        public delegate void OnColliding(GameObject go1, GameObject go2);
+
+        public GameObject(GameScreen gameScreen, Texture2D texture2D, World world, bool staticObject = false)
         {
             this.world = world;
             
@@ -64,7 +66,13 @@ namespace PackageLoss
 
             //Create a single body with multiple fixtures
             Compound = BodyFactory.CreateCompoundPolygon(world, list, 1f, BodyType.Dynamic);
-            Compound.BodyType = BodyType.Dynamic;
+            if (staticObject)
+                Compound.BodyType = BodyType.Static;
+            else
+            {
+                Compound.BodyType = BodyType.Dynamic;
+                Compound.Restitution = 0.8f;
+            }
             Compound.Inertia = 100.0f;
         }
 
@@ -73,6 +81,11 @@ namespace PackageLoss
             gameScreen.Game.SpriteBatch.Begin(0, null, null, null, null, null, camera.View);
             gameScreen.Game.SpriteBatch.Draw(polygonTexture, ConvertUnits.ToDisplayUnits(Compound.Position), null, Color.White, Compound.Rotation, _origin, 1.0f, SpriteEffects.None, 0f);
             gameScreen.Game.SpriteBatch.End();
+        }
+
+        public void Update(GameTime gameTime)
+        {
+
         }
     }
 }
