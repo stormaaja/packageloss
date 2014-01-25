@@ -98,7 +98,7 @@ namespace PackageLoss
             background = Game.Content.Load<Texture2D>("background");
             gameObjects = new List<GameObject>();
             World = new World(new Vector2(0f, 9.82f));
-            mouseTexture = Game.Content.Load<Texture2D>("Mouse-cursor-hand-pointer.png");
+            mouseTexture = Game.Content.Load<Texture2D>("Mouse-cursor-hand-pointer");
             Camera = new Camera2D(Game.GraphicsDevice);
             
             HiddenBody = BodyFactory.CreateBody(World, Vector2.Zero);
@@ -132,11 +132,20 @@ namespace PackageLoss
             car.Compound.Mass = 6000;
 
             GameObject tire1 = FindGameObject("Sprinter2_rengas");
-            tire1.Compound.Position = car.Compound.Position + new Vector2(-1.709f, -0.78f);
+            Vector2 axis = new Vector2(50f, 10f);
+            tire1.Compound.Position = car.Compound.Position + axis;
             tire1.Compound.CollisionGroup = 1;
-            Vector2 axis = new Vector2(0.0f, -50.2f);
+            
             WheelJoint wheelJoint1 = new WheelJoint(car.Compound, tire1.Compound, tire1.Compound.Position, axis, true);
             World.AddJoint(wheelJoint1);
+
+            GameObject tire2 = AddGameObject(tire1.PolygonTexture);
+            Vector2 axis2 = ConvertUnits.ToSimUnits(new Vector2(-50f, 10f));
+            tire2.Compound.Position = car.Compound.Position + axis2;
+            tire2.Compound.CollisionGroup = 1;
+            
+            WheelJoint wheelJoint2 = new WheelJoint(car.Compound, tire2.Compound, tire2.Compound.Position, axis2, true);
+            World.AddJoint(wheelJoint2);
             //JointFactory.CreateWheelJoint(World, car.Compound, tire1.Compound, new Vector2(200f, 0f), true);
             //JointFactory.CreateWheelJoint(World, car.Compound, AddGameObject(tire1.PolygonTexture, "Sprinter2_rengas_2").Compound, new Vector2(-200f, 0f)); 
 
