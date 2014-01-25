@@ -28,6 +28,7 @@ namespace PackageLoss
             "table",
             "tv",
             "washingMachine",
+            "sprinter"
         };
         GameObject movingObject = null;
         Vector2 moveSpeed;
@@ -40,6 +41,8 @@ namespace PackageLoss
         Rectangle bgRectangle;
         List<GameObject> gameObjects;
         Body bottom;
+        readonly float minScale = 0.4f, maxScale = 1.0f;
+        GameObject car;
         //Rectangle bottomRectangle;
         
         Camera2D camera;
@@ -92,11 +95,14 @@ namespace PackageLoss
 
             bottom = BodyFactory.CreateRectangle(World, ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Width), ConvertUnits.ToSimUnits(20f), 10.0f);
             //bottomRectangle = new Rectangle(0, 0, Game.Window.ClientBounds.Width, 10);
-            bottom.Position = new Vector2(ConvertUnits.ToSimUnits(-Game.Window.ClientBounds.Width / 4f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f));
+            bottom.Position = new Vector2(ConvertUnits.ToSimUnits(0f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f));
             bottom.OnCollision += Compound_OnCollision;
 
             // Special characterics for objects
             FindGameObject("basketBall01").Compound.Restitution = FindGameObject("basketBall02").Compound.Restitution = FindGameObject("football").Compound.Restitution = 0.8f;
+            car = FindGameObject("sprinter");
+            car.Compound.BodyType = BodyType.Dynamic;
+            car.Compound.Position = new Vector2(ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Width / 4f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f));
         }
 
         public GameObject AddGameObject(Texture2D texture)
@@ -126,12 +132,22 @@ namespace PackageLoss
             
         }
 
+        float CalculateScale(Vector2 position)
+        {
+            float scale = Vector2.Distance(position, car.Compound.Position) / 10.0f;
+            if (scale < minScale)
+                return minScale;
+            else if (scale > maxScale)
+                return maxScale;
+            return scale;
+        }
 
         internal void Update(GameTime gameTime)
         {
             World.Step(Math.Min((float)gameTime.ElapsedGameTime.TotalSeconds, (1f / 30f)));
             foreach (GameObject gameObject in gameObjects)
             {
+                gameObject.SetScale(CalculateScale(gameObject.Compound.Position));
                 gameObject.Update(gameTime);
             }
             camera.Update(gameTime);
@@ -150,7 +166,7 @@ namespace PackageLoss
                     if (fixture != null)
                     {
                         GameObject gameObject = FindGameObject(fixture.Body);
-                        if (gameObject != null)
+                        if (gameObject != null && gameObject != car)
                         {
                             movingObject = gameObject;
                             moveDelta = movingObject.Compound.Position - mouseInWorld;
