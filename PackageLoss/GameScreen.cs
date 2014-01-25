@@ -98,6 +98,7 @@ namespace PackageLoss
             World = new World(new Vector2(0f, 9.82f));
             mouseTexture = Game.Content.Load<Texture2D>("Mouse-cursor-hand-pointer.png");
             camera = new Camera2D(Game.GraphicsDevice);
+            camera.Zoom = 0.5f;
             HiddenBody = BodyFactory.CreateBody(World, Vector2.Zero);
             //load texture that will represent the physics body
             textures = new Texture2D[textureFilenames.Length];
