@@ -16,7 +16,22 @@ namespace PackageLoss
 {
     internal class GameScreen
     {
+        readonly String[] textureFilenames = new String[] {
+            "basketBall01",
+            "basketBall02",
+            "chainsaw",
+            "crystal",
+            "football",
+            "pillow01",
+            "skates",
+            "sword",
+            "table",
+            "tv",
+            "washingMachine",
+        };
         GameObject movingObject = null;
+        Vector2 moveSpeed;
+        Vector2 mouseInWorld;
         Vector2 moveDelta;
         protected World World;
         Body HiddenBody;
@@ -25,7 +40,7 @@ namespace PackageLoss
         Rectangle bgRectangle;
         List<GameObject> gameObjects;
         Body bottom;
-        Rectangle bottomRectangle;
+        //Rectangle bottomRectangle;
         
         Camera2D camera;
         public Game1 Game { get; set; }
@@ -57,35 +72,31 @@ namespace PackageLoss
             bgRectangle = new Rectangle(0, 0, Game.Window.ClientBounds.Width, Game.Window.ClientBounds.Height);
             background = Game.Content.Load<Texture2D>("background");
             gameObjects = new List<GameObject>();
-            World = new World(Vector2.Zero);
-            World.Gravity = new Vector2(0.0f, 4.0f);
+            World = new World(new Vector2(0f, 9.82f));
 
             camera = new Camera2D(Game.GraphicsDevice);
             HiddenBody = BodyFactory.CreateBody(World, Vector2.Zero);
             //load texture that will represent the physics body
-            textures = new Texture2D[] {
-                Game.Content.Load<Texture2D>("basketBall01"),
-                Game.Content.Load<Texture2D>("basketBall02"),
-                Game.Content.Load<Texture2D>("chainsaw"),
-                Game.Content.Load<Texture2D>("crystal"),
-                Game.Content.Load<Texture2D>("football"),
-                Game.Content.Load<Texture2D>("pillow01"),
-                Game.Content.Load<Texture2D>("skates"),
-                Game.Content.Load<Texture2D>("sword"),
-                Game.Content.Load<Texture2D>("table"),
-                Game.Content.Load<Texture2D>("tv"),
-                Game.Content.Load<Texture2D>("washingMachine"),
-            };
+            textures = new Texture2D[textureFilenames.Length];
+            for (int i = 0; i < textureFilenames.Length; i++)
+            {
+                textures[i] = Game.Content.Load<Texture2D>(textureFilenames[i]);
+                textures[i].Name = textureFilenames[i]; // XNA hack
+            }
+            float screenWidth = ConvertUnits.ToSimUnits(Game.GraphicsDevice.Viewport.Height), screenHeight = ConvertUnits.ToSimUnits(Game.GraphicsDevice.Viewport.Width);
             Random rand = new Random();
             foreach (Texture2D texture in textures)
             {
-                AddGameObject(texture).Compound.Position = new Vector2((rand.Next(40) - 20) / 100.0f, (rand.Next(40) - 20) / 100.0f);
+                AddGameObject(texture).Compound.Position = new Vector2((float)(rand.NextDouble() - 0.5) * screenWidth, (float)(rand.NextDouble() - 0.5) * screenHeight);
             }
-                        
-            bottom = BodyFactory.CreateRectangle(World, Game.Window.ClientBounds.Width, 1.0f, 10.0f);
-            bottomRectangle = new Rectangle(0, 0, Game.Window.ClientBounds.Width, 10);
-            bottom.Position = new Vector2(-20.0f, 10.0f);
+
+            bottom = BodyFactory.CreateRectangle(World, ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Width), ConvertUnits.ToSimUnits(20f), 10.0f);
+            //bottomRectangle = new Rectangle(0, 0, Game.Window.ClientBounds.Width, 10);
+            bottom.Position = new Vector2(ConvertUnits.ToSimUnits(-Game.Window.ClientBounds.Width / 4f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f));
             bottom.OnCollision += Compound_OnCollision;
+
+            // Special characterics for objects
+            FindGameObject("basketBall01").Compound.Restitution = FindGameObject("basketBall02").Compound.Restitution = FindGameObject("football").Compound.Restitution = 0.8f;
         }
 
         public GameObject AddGameObject(Texture2D texture)
@@ -93,6 +104,7 @@ namespace PackageLoss
             GameObject gameObject = new GameObject(this, texture, World);
             gameObject.Compound.OnCollision += Compound_OnCollision;
             gameObjects.Add(gameObject);
+            gameObject.Name = texture.Name;
             return gameObject;
         }
 
@@ -125,11 +137,13 @@ namespace PackageLoss
             camera.Update(gameTime);
         }
 
-        internal void HandleMouse(MouseState mouseState)
+        internal void HandleMouse(MouseState mouseState, GameTime gameTime)
         {
             if (mouseState.LeftButton == ButtonState.Pressed)
-            {
-                Vector2 mouseInWorld = camera.ConvertScreenToWorld(new Vector2(mouseState.X, mouseState.Y));
+            {                
+                Vector2 newMouseInWorld = camera.ConvertScreenToWorld(new Vector2(mouseState.X, mouseState.Y));
+                moveSpeed = (mouseInWorld - newMouseInWorld) * (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                mouseInWorld = newMouseInWorld;
                 if (movingObject == null)
                 {
                     Fixture fixture = World.TestPoint(mouseInWorld);
@@ -145,13 +159,17 @@ namespace PackageLoss
                 }
                 else
                 {
-                    movingObject.Compound.Position = mouseInWorld + moveDelta;
-                    movingObject.Compound.LinearVelocity = Vector2.Zero;
+                    if (mouseState.RightButton == ButtonState.Pressed)
+                        movingObject.Compound.Rotation += moveSpeed.X / 10.0f;
+                    movingObject.Compound.Position = mouseInWorld + moveDelta;                    
                 }
             }
 
             if (movingObject != null && mouseState.LeftButton == ButtonState.Released)
+            {
+                movingObject.Compound.LinearVelocity = -moveSpeed;
                 movingObject = null;
+            }
         }
 
         internal GameObject FindGameObject(Body body)
@@ -159,6 +177,16 @@ namespace PackageLoss
             foreach (GameObject gameObject in gameObjects)
             {
                 if (gameObject.Compound == body)
+                    return gameObject;
+            }
+            return null;
+        }
+
+        internal GameObject FindGameObject(String name)
+        {
+            foreach (GameObject gameObject in gameObjects)
+            {
+                if (gameObject.Name.Equals(name))
                     return gameObject;
             }
             return null;

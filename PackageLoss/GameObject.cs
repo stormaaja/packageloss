@@ -16,6 +16,7 @@ namespace PackageLoss
     internal class GameObject
     {
         internal Body Compound { get; set; }
+        public String Name { get; set; }
         private Texture2D polygonTexture;
         World world;
         GameScreen gameScreen;
@@ -71,7 +72,7 @@ namespace PackageLoss
             else
             {
                 Compound.BodyType = BodyType.Dynamic;
-                Compound.Restitution = 0.8f;
+                Compound.Restitution = 0.4f;
             }
             Compound.Inertia = 100.0f;
         }
