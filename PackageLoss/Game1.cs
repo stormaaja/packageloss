@@ -24,12 +24,13 @@ namespace PackageLoss
             : base()
         {
             graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferWidth = 1920;
-            graphics.PreferredBackBufferHeight = 1080;
+            graphics.PreferMultiSampling = true;
+            graphics.IsFullScreen = false;
+            graphics.PreferredBackBufferWidth = 1280;
+            graphics.PreferredBackBufferHeight = 720; 
             Content.RootDirectory = "Content";
-            ConvertUnits.SetDisplayUnitToSimUnitRatio(24);
+            ConvertUnits.SetDisplayUnitToSimUnitRatio(64f);
             IsFixedTimeStep = true;
-            graphics.IsFullScreen = true;
             
         }
 
@@ -77,7 +78,7 @@ namespace PackageLoss
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             gameScreen.Update(gameTime);
-            gameScreen.HandleMouse(Mouse.GetState());
+            gameScreen.HandleMouse(Mouse.GetState(), gameTime);
             base.Update(gameTime);
         }
 
