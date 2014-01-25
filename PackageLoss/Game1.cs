@@ -30,6 +30,7 @@ namespace PackageLoss
             graphics.PreferredBackBufferHeight = 720; 
             Content.RootDirectory = "Content";
             ConvertUnits.SetDisplayUnitToSimUnitRatio(64f);
+            IsMouseVisible = true;
             IsFixedTimeStep = true;
             
         }
