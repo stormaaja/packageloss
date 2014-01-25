@@ -28,6 +28,7 @@ namespace PackageLoss
             "sword",
             "table",
             "tv",
+            "Cat1",
             "washingMachine",
             "Sprinter2_ulko",
             //"Sprinter2_ulko_alfa",
@@ -37,7 +38,7 @@ namespace PackageLoss
         };
         GameObject movingObject = null, cursor;
         Vector2 moveSpeed;
-        Vector2 mouseInWorld;
+        Vector2 mouseInWorld, mouseOnScreen, mouseFix = new Vector2(40, 32);
         Vector2 moveDelta;
         protected World World;
         Body HiddenBody;
@@ -50,6 +51,7 @@ namespace PackageLoss
         bool drivingState = false;
         GameObject car, carBridge;
         //Rectangle bottomRectangle;
+        Texture2D mouseTexture;
         Joint mouseJoint;
         
         Camera2D camera;
@@ -88,7 +90,7 @@ namespace PackageLoss
             background = Game.Content.Load<Texture2D>("background");
             gameObjects = new List<GameObject>();
             World = new World(new Vector2(0f, 9.82f));
-
+            mouseTexture = Game.Content.Load<Texture2D>("Mouse-cursor-hand-pointer.png");
             camera = new Camera2D(Game.GraphicsDevice);
             HiddenBody = BodyFactory.CreateBody(World, Vector2.Zero);
             //load texture that will represent the physics body
@@ -118,11 +120,14 @@ namespace PackageLoss
             car.Compound.CollisionGroup = 1;
             car.Compound.IgnoreCCD = true;
             car.Compound.OnCollision -= Compound_OnCollision;
+            car.Compound.Mass = 6000;
 
             carBridge = FindGameObject("Sprinter2_luukku");
-            carBridge.Compound.Position = new Vector2(ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Width / 4f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f) - ConvertUnits.ToSimUnits(80.0f));
+            carBridge.Compound.Position = new Vector2(ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Width / 4f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f)) + ConvertUnits.ToSimUnits(new Vector2(-224, 20));
             carBridge.Compound.CollisionGroup = 1;
             JointFactory.CreateRevoluteJoint(World, car.Compound, carBridge.Compound, Vector2.Zero);
+            //JointFactory.CreateAngleJoint(World, car.Compound, carBridge.Compound).TargetAngle = 90f;
+            //JointFactory.
 
             GameObject bottom = FindGameObject("bottom");
             bottom.Compound.Position = new Vector2(ConvertUnits.ToSimUnits(2500f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f - 150f));
@@ -162,7 +167,9 @@ namespace PackageLoss
             {
                 gameObject.Draw(Game.SpriteBatch, camera);
             }
-            
+            Game.SpriteBatch.Begin();
+            Game.SpriteBatch.Draw(mouseTexture, mouseOnScreen - mouseFix, Color.White);
+            Game.SpriteBatch.End();
         }
 
         float CalculateScale(Vector2 position)
@@ -188,7 +195,8 @@ namespace PackageLoss
 
         public void HandleMouse(MouseState mouseState, GameTime gameTime)
         {
-            Vector2 newMouseInWorld = camera.ConvertScreenToWorld(new Vector2(mouseState.X + 25, mouseState.Y + 30));
+            mouseOnScreen = new Vector2(mouseState.X + 25, mouseState.Y + 30);
+            Vector2 newMouseInWorld = camera.ConvertScreenToWorld(mouseOnScreen);
             //cursor.Compound.Position = newMouseInWorld;
             if (drivingState)
                 return;
@@ -215,8 +223,8 @@ namespace PackageLoss
                 }
                 else
                 {
-                    if (mouseState.RightButton == ButtonState.Pressed)
-                        movingObject.Compound.Rotation += moveSpeed.X / 10.0f;
+                    //if (mouseState.RightButton == ButtonState.Pressed)
+                        //movingObject.Compound.Rotation += moveSpeed.X / 10.0f;
                     mouseJoint.WorldAnchorB = mouseInWorld;
                     //movingObject.Compound.Position = mouseInWorld + moveDelta;                 
                 }
@@ -224,7 +232,7 @@ namespace PackageLoss
 
             if (movingObject != null && mouseState.LeftButton == ButtonState.Released)
             {
-                movingObject.Compound.LinearVelocity = -moveSpeed;
+                //movingObject.Compound.LinearVelocity = -moveSpeed;
                 if (mouseJoint != null)
                 {
                     World.RemoveJoint(mouseJoint);
