@@ -17,7 +17,7 @@ namespace PackageLoss
     {
         internal Body Compound { get; set; }
         public String Name { get; set; }
-        private Texture2D polygonTexture;
+        public Texture2D PolygonTexture { get; set; }
         World world;
         GameScreen gameScreen;
 
@@ -30,15 +30,15 @@ namespace PackageLoss
             this.world = world;
             
             this.gameScreen = gameScreen;
-            this.polygonTexture = texture2D;
+            this.PolygonTexture = texture2D;
             //Create an array to hold the data from the texture
-            uint[] data = new uint[polygonTexture.Width * polygonTexture.Height];
+            uint[] data = new uint[PolygonTexture.Width * PolygonTexture.Height];
 
             //Transfer the texture data to the array
-            polygonTexture.GetData(data);
+            PolygonTexture.GetData(data);
 
             //Find the vertices that makes up the outline of the shape in the texture
-            Vertices textureVertices = PolygonTools.CreatePolygon(data, polygonTexture.Width, false);
+            Vertices textureVertices = PolygonTools.CreatePolygon(data, PolygonTexture.Width, false);
 
             //The tool return vertices as they were found in the texture.
             //We need to find the real center (centroid) of the vertices for 2 reasons:
@@ -80,7 +80,7 @@ namespace PackageLoss
         public void Draw(SpriteBatch spriteBatch, Camera2D camera)
         {
             gameScreen.Game.SpriteBatch.Begin(0, null, null, null, null, null, camera.View);
-            gameScreen.Game.SpriteBatch.Draw(polygonTexture, ConvertUnits.ToDisplayUnits(Compound.Position), null, Color.White, Compound.Rotation, _origin, 1f, SpriteEffects.None, 0f);
+            gameScreen.Game.SpriteBatch.Draw(PolygonTexture, ConvertUnits.ToDisplayUnits(Compound.Position), null, Color.White, Compound.Rotation, _origin, 1f, SpriteEffects.None, 0f);
             gameScreen.Game.SpriteBatch.End();
         }
 
