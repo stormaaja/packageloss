@@ -16,5 +16,6 @@ namespace PackageLoss
         void Draw(GameTime gameTime);
         void Update(GameTime gameTime);
         void HandleMouse(MouseState mouseState, GameTime gameTime);
+        void HandleKeyboard(KeyboardState keyboardState, GameTime gameTime);
     }
 }

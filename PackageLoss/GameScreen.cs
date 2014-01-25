@@ -216,5 +216,11 @@ namespace PackageLoss
             }
             return null;
         }
+
+        public void HandleKeyboard(KeyboardState keyboardState, GameTime gameTime)
+        {
+
+        }
+
     }
 }
