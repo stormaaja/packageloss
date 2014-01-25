@@ -238,7 +238,7 @@ namespace PackageLoss
             _positionTracking = false;
             _rotationTracking = false;
 
-            _currentZoom = 1f;
+            _currentZoom = 1.0f;
 
             SetView();
         }
