@@ -28,7 +28,8 @@ namespace PackageLoss
             "table",
             "tv",
             "washingMachine",
-            "sprinter"
+            "sprinter",
+            "bottom"
         };
         GameObject movingObject = null;
         Vector2 moveSpeed;
@@ -40,8 +41,9 @@ namespace PackageLoss
         Texture2D[] textures;
         Rectangle bgRectangle;
         List<GameObject> gameObjects;
-        Body bottom;
-        readonly float minScale = 0.4f, maxScale = 1.0f;
+        //Body bottom;
+        readonly float minScale = 0.4f, maxScale = 1.0f, carPower = 0.3f;
+        bool drivingState = false;
         GameObject car;
         //Rectangle bottomRectangle;
         
@@ -98,19 +100,24 @@ namespace PackageLoss
                 AddGameObject(texture).Compound.Position = new Vector2((float)(rand.NextDouble() - 0.5) * screenWidth, (float)(rand.NextDouble() - 0.5) * screenHeight);
             }
 
-            bottom = BodyFactory.CreateRectangle(World, ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Width), ConvertUnits.ToSimUnits(20f), 10.0f);
+            //bottom = BodyFactory.CreateRectangle(World, ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Width * 10.0f), ConvertUnits.ToSimUnits(20f), 10.0f);
             //bottomRectangle = new Rectangle(0, 0, Game.Window.ClientBounds.Width, 10);
-            bottom.Position = new Vector2(ConvertUnits.ToSimUnits(0f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f));
-            bottom.OnCollision += Compound_OnCollision;
+            //bottom.Position = new Vector2(ConvertUnits.ToSimUnits(0f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f));
+            //bottom.OnCollision += Compound_OnCollision;
 
             // Special characterics for objects
             FindGameObject("basketBall01").Compound.Restitution = FindGameObject("basketBall02").Compound.Restitution = FindGameObject("football").Compound.Restitution = 0.8f;
             car = FindGameObject("sprinter");
-            car.Compound.BodyType = BodyType.Static;
+            car.Compound.BodyType = BodyType.Dynamic;
             car.Compound.Position = new Vector2(ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Width / 4f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f) - ConvertUnits.ToSimUnits(80.0f));
             car.Compound.CollisionGroup = 1;
             car.Compound.IgnoreCCD = true;
             car.Compound.OnCollision -= Compound_OnCollision;
+
+            GameObject bottom = FindGameObject("bottom");
+            bottom.Compound.Position = new Vector2(ConvertUnits.ToSimUnits(2500f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f - 150f));
+            bottom.Compound.BodyType = BodyType.Static;
+            bottom.Compound.CollisionGroup = 1;
         }
 
         public GameObject AddGameObject(Texture2D texture)
@@ -152,7 +159,7 @@ namespace PackageLoss
         }
 
         public void Update(GameTime gameTime)
-        {
+        {            
             World.Step(Math.Min((float)gameTime.ElapsedGameTime.TotalSeconds, (1f / 30f)));
             foreach (GameObject gameObject in gameObjects)
             {
@@ -164,6 +171,8 @@ namespace PackageLoss
 
         public void HandleMouse(MouseState mouseState, GameTime gameTime)
         {
+            if (drivingState)
+                return;
             if (mouseState.LeftButton == ButtonState.Pressed)
             {                
                 Vector2 newMouseInWorld = camera.ConvertScreenToWorld(new Vector2(mouseState.X, mouseState.Y));
@@ -172,7 +181,7 @@ namespace PackageLoss
                 if (movingObject == null)
                 {
                     Fixture fixture = World.TestPoint(mouseInWorld);
-                    if (fixture != null)
+                    if (fixture != null && fixture.CollisionGroup != 1)
                     {
                         GameObject gameObject = FindGameObject(fixture.Body);
                         if (gameObject != null && gameObject != car)
@@ -219,7 +228,14 @@ namespace PackageLoss
 
         public void HandleKeyboard(KeyboardState keyboardState, GameTime gameTime)
         {
-
+            if (keyboardState.IsKeyDown(Keys.Up))
+            {
+                if (!drivingState) {
+                    drivingState = true;
+                    camera.TrackingBody = car.Compound;
+                }
+                car.Compound.LinearVelocity += new Vector2(carPower, 0.0f);
+            }
         }
 
     }
