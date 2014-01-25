@@ -162,7 +162,6 @@ namespace PackageLoss
             bottom.Compound.BodyType = BodyType.Static;
             bottom.Compound.CollisionGroup = 1;
             
-
             //cursor = FindGameObject("Mouse-cursor-hand-pointer");
             //cursor.Compound.CollisionGroup = 4;
             //cursor.Compound.CollisionCategories = Category.Cat30;
