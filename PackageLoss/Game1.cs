@@ -18,18 +18,22 @@ namespace PackageLoss
     {
         GraphicsDeviceManager graphics;
         internal SpriteBatch SpriteBatch;
-        GameScreen gameScreen;
+        int selectedScreen = 0;
+
+        BaseScreen[] screens = new BaseScreen[2];
 
         public Game1()
             : base()
         {
             graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferWidth = 1920;
-            graphics.PreferredBackBufferHeight = 1080;
+            graphics.PreferMultiSampling = true;
+            graphics.IsFullScreen = false;
+            graphics.PreferredBackBufferWidth = 1280;
+            graphics.PreferredBackBufferHeight = 720; 
             Content.RootDirectory = "Content";
-            ConvertUnits.SetDisplayUnitToSimUnitRatio(24);
+            ConvertUnits.SetDisplayUnitToSimUnitRatio(64f);
+            IsMouseVisible = true;
             IsFixedTimeStep = true;
-            graphics.IsFullScreen = true;
             
         }
 
@@ -41,7 +45,7 @@ namespace PackageLoss
         /// </summary>
         protected override void Initialize()
         {
-            gameScreen = new GameScreen(this);
+            screens[0] = new GameScreen(this);
 
             base.Initialize();
         }
@@ -54,7 +58,7 @@ namespace PackageLoss
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             SpriteBatch = new SpriteBatch(GraphicsDevice);
-            gameScreen.LoadContent();
+            screens[selectedScreen].LoadContent();
             // TODO: use this.Content to load your game content here
         }
 
@@ -76,8 +80,10 @@ namespace PackageLoss
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-            gameScreen.Update(gameTime);
-            gameScreen.HandleMouse(Mouse.GetState());
+            screens[selectedScreen].HandleMouse(Mouse.GetState(), gameTime);
+            screens[selectedScreen].HandleKeyboard(Keyboard.GetState(), gameTime);
+            screens[selectedScreen].Update(gameTime);
+            
             base.Update(gameTime);
         }
 
@@ -89,7 +95,7 @@ namespace PackageLoss
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            gameScreen.Draw(gameTime);
+            screens[selectedScreen].Draw(gameTime);
 
             base.Draw(gameTime);
         }

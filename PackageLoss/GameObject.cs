@@ -16,6 +16,7 @@ namespace PackageLoss
     internal class GameObject
     {
         internal Body Compound { get; set; }
+        public String Name { get; set; }
         private Texture2D polygonTexture;
         World world;
         GameScreen gameScreen;
@@ -71,21 +72,26 @@ namespace PackageLoss
             else
             {
                 Compound.BodyType = BodyType.Dynamic;
-                Compound.Restitution = 0.8f;
+                Compound.Restitution = 0.4f;
             }
             Compound.Inertia = 100.0f;
         }
 
-        public void Draw(SpriteBatch spriteBatch, Camera2D camera)
+        public void Draw(SpriteBatch spriteBatch, Camera2D camera, float scale = 1.0f)
         {
             gameScreen.Game.SpriteBatch.Begin(0, null, null, null, null, null, camera.View);
-            gameScreen.Game.SpriteBatch.Draw(polygonTexture, ConvertUnits.ToDisplayUnits(Compound.Position), null, Color.White, Compound.Rotation, _origin, 1.0f, SpriteEffects.None, 0f);
+            gameScreen.Game.SpriteBatch.Draw(polygonTexture, ConvertUnits.ToDisplayUnits(Compound.Position), null, Color.White, Compound.Rotation, _origin, scale, SpriteEffects.None, 0f);
             gameScreen.Game.SpriteBatch.End();
         }
 
         public void Update(GameTime gameTime)
         {
 
+        }
+
+        internal void SetScale(float p)
+        {
+            
         }
     }
 }
