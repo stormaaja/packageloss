@@ -29,9 +29,10 @@ namespace PackageLoss
             "tv",
             "washingMachine",
             "sprinter",
-            "bottom"
+            "bottom",
+            //"Mouse-cursor-hand-pointer"
         };
-        GameObject movingObject = null;
+        GameObject movingObject = null, cursor;
         Vector2 moveSpeed;
         Vector2 mouseInWorld;
         Vector2 moveDelta;
@@ -118,6 +119,13 @@ namespace PackageLoss
             bottom.Compound.Position = new Vector2(ConvertUnits.ToSimUnits(2500f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f - 150f));
             bottom.Compound.BodyType = BodyType.Static;
             bottom.Compound.CollisionGroup = 1;
+
+            //cursor = FindGameObject("Mouse-cursor-hand-pointer");
+            //cursor.Compound.CollisionGroup = 4;
+            //cursor.Compound.CollisionCategories = Category.Cat30;
+            //cursor.Compound.IgnoreCCD = true;
+            //cursor.Compound.BodyType = BodyType.Kinematic;
+            //cursor.Compound.Mass = 0f;
         }
 
         public GameObject AddGameObject(Texture2D texture)
@@ -171,11 +179,13 @@ namespace PackageLoss
 
         public void HandleMouse(MouseState mouseState, GameTime gameTime)
         {
+            Vector2 newMouseInWorld = camera.ConvertScreenToWorld(new Vector2(mouseState.X + 25, mouseState.Y + 30));
+            //cursor.Compound.Position = newMouseInWorld;
             if (drivingState)
                 return;
             if (mouseState.LeftButton == ButtonState.Pressed)
             {                
-                Vector2 newMouseInWorld = camera.ConvertScreenToWorld(new Vector2(mouseState.X, mouseState.Y));
+                
                 moveSpeed = (mouseInWorld - newMouseInWorld) * (float)gameTime.ElapsedGameTime.TotalMilliseconds;
                 mouseInWorld = newMouseInWorld;
                 if (movingObject == null)
