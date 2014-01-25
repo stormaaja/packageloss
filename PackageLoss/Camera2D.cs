@@ -134,7 +134,7 @@ namespace PackageLoss
             set
             {
                 _currentZoom = value;
-                _currentZoom = MathHelper.Clamp(_currentZoom, MinZoom, MaxZoom);
+                _currentZoom = MathHelper.Clamp(_currentZoom, MinZoom, MaxZoom);                
             }
         }
 

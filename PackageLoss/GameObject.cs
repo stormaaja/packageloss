@@ -59,7 +59,7 @@ namespace PackageLoss
             //Adjust the scale of the object for WP7's lower resolution
 
             //scale the vertices from graphics space to sim space
-            Vector2 vertScale = new Vector2(ConvertUnits.ToSimUnits(1));
+            Vector2 vertScale = new Vector2(ConvertUnits.ToSimUnits(1) * gameScreen.Camera.Zoom);
             foreach (Vertices vertices in list)
             {
                 vertices.Scale(ref vertScale);
@@ -77,10 +77,10 @@ namespace PackageLoss
             Compound.Inertia = 100.0f;
         }
 
-        public void Draw(SpriteBatch spriteBatch, Camera2D camera, float scale = 1.0f)
+        public void Draw(SpriteBatch spriteBatch, Camera2D camera)
         {
             gameScreen.Game.SpriteBatch.Begin(0, null, null, null, null, null, camera.View);
-            gameScreen.Game.SpriteBatch.Draw(polygonTexture, ConvertUnits.ToDisplayUnits(Compound.Position), null, Color.White, Compound.Rotation, _origin, scale, SpriteEffects.None, 0f);
+            gameScreen.Game.SpriteBatch.Draw(polygonTexture, ConvertUnits.ToDisplayUnits(Compound.Position), null, Color.White, Compound.Rotation, _origin, 1f, SpriteEffects.None, 0f);
             gameScreen.Game.SpriteBatch.End();
         }
 

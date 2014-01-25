@@ -42,11 +42,12 @@ namespace PackageLoss
             "bottom",
             //"Mouse-cursor-hand-pointer"
         };
-        GameObject movingObject = null, cursor;
+        GameObject movingObject = null;
         Vector2 moveSpeed;
         Vector2 mouseInWorld, mouseOnScreen, mouseFix = new Vector2(20, 16);
         Vector2 moveDelta;
         protected World World;
+        int mouseMiddle;
         Body HiddenBody;
         Texture2D background;
         Texture2D[] textures;
@@ -59,8 +60,8 @@ namespace PackageLoss
         //Rectangle bottomRectangle;
         Texture2D mouseTexture;
         Joint mouseJoint;
-        
-        Camera2D camera;
+
+        public Camera2D Camera { get; set; }
         public Game1 Game { get; set; }
 
         public GameScreen(Game1 game)
@@ -97,8 +98,8 @@ namespace PackageLoss
             gameObjects = new List<GameObject>();
             World = new World(new Vector2(0f, 9.82f));
             mouseTexture = Game.Content.Load<Texture2D>("Mouse-cursor-hand-pointer.png");
-            camera = new Camera2D(Game.GraphicsDevice);
-            camera.Zoom = 0.5f;
+            Camera = new Camera2D(Game.GraphicsDevice);
+            
             HiddenBody = BodyFactory.CreateBody(World, Vector2.Zero);
             //load texture that will represent the physics body
             textures = new Texture2D[textureFilenames.Length];
@@ -113,7 +114,7 @@ namespace PackageLoss
             {
                 AddGameObject(texture).Compound.Position = new Vector2((float)(rand.NextDouble() - 0.5) * screenWidth, (float)(rand.NextDouble() - 0.5) * screenHeight);
             }
-
+            mouseMiddle = Mouse.GetState().ScrollWheelValue;
             //bottom = BodyFactory.CreateRectangle(World, ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Width * 10.0f), ConvertUnits.ToSimUnits(20f), 10.0f);
             //bottomRectangle = new Rectangle(0, 0, Game.Window.ClientBounds.Width, 10);
             //bottom.Position = new Vector2(ConvertUnits.ToSimUnits(0f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f));
@@ -123,21 +124,21 @@ namespace PackageLoss
             FindGameObject("basketBall01").Compound.Restitution = FindGameObject("basketBall02").Compound.Restitution = FindGameObject("football").Compound.Restitution = 0.8f;
             car = FindGameObject("Sprinter2_ulko");
             car.Compound.BodyType = BodyType.Dynamic;
-            car.Compound.Position = new Vector2(ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Width / 4f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f) - ConvertUnits.ToSimUnits(80.0f));
+            car.Compound.Position = Camera.ConvertScreenToWorld(new Vector2(Game.Window.ClientBounds.Width / 2f + 130f, Game.Window.ClientBounds.Height / 2f));
             car.Compound.CollisionGroup = 1;
             car.Compound.IgnoreCCD = true;
             car.Compound.OnCollision -= Compound_OnCollision;
             car.Compound.Mass = 6000;
 
             carBridge = FindGameObject("Sprinter2_luukku");
-            carBridge.Compound.Position = new Vector2(ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Width / 4f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f)) + ConvertUnits.ToSimUnits(new Vector2(-224, 20));
+            carBridge.Compound.Position = car.Compound.Position + ConvertUnits.ToSimUnits(new Vector2(-200, 50));
             carBridge.Compound.CollisionGroup = 1;
             JointFactory.CreateRevoluteJoint(World, car.Compound, carBridge.Compound, Vector2.Zero);
             //JointFactory.CreateAngleJoint(World, car.Compound, carBridge.Compound).TargetAngle = 90f;
             //JointFactory.
 
             GameObject bottom = FindGameObject("bottom");
-            bottom.Compound.Position = new Vector2(ConvertUnits.ToSimUnits(2500f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f - 150f));
+            bottom.Compound.Position = Camera.ConvertScreenToWorld(new Vector2(3500f, Game.Window.ClientBounds.Height - 200f));
             bottom.Compound.BodyType = BodyType.Static;
             bottom.Compound.CollisionGroup = 1;
 
@@ -147,6 +148,9 @@ namespace PackageLoss
             //cursor.Compound.IgnoreCCD = true;
             //cursor.Compound.BodyType = BodyType.Kinematic;
             //cursor.Compound.Mass = 0f;
+            Camera.Zoom = 2f;
+            Camera.MoveCamera(ConvertUnits.ToSimUnits(new Vector2(-150f, 150f)));
+            //Camera.TrackingBody = car.Compound;
         }
 
         public GameObject AddGameObject(Texture2D texture)
@@ -172,7 +176,7 @@ namespace PackageLoss
 
             foreach (GameObject gameObject in gameObjects)
             {
-                gameObject.Draw(Game.SpriteBatch, camera);
+                gameObject.Draw(Game.SpriteBatch, Camera);
             }
             Game.SpriteBatch.Begin();
             Game.SpriteBatch.Draw(mouseTexture, mouseOnScreen - mouseFix, Color.White);
@@ -197,13 +201,15 @@ namespace PackageLoss
                 gameObject.SetScale(CalculateScale(gameObject.Compound.Position));
                 gameObject.Update(gameTime);
             }
-            camera.Update(gameTime);
+            if (drivingState && Camera.Zoom > 1.0f)
+                Camera.Zoom -= 0.01f;
+            Camera.Update(gameTime);
         }
 
         public void HandleMouse(MouseState mouseState, GameTime gameTime)
         {
             mouseOnScreen = new Vector2(mouseState.X + 25, mouseState.Y + 30);
-            Vector2 newMouseInWorld = camera.ConvertScreenToWorld(mouseOnScreen);
+            Vector2 newMouseInWorld = Camera.ConvertScreenToWorld(mouseOnScreen);
             //cursor.Compound.Position = newMouseInWorld;
             if (drivingState)
                 return;
@@ -247,6 +253,9 @@ namespace PackageLoss
                 }
                 movingObject = null;
             }
+
+            Camera.Zoom += (mouseMiddle - mouseState.ScrollWheelValue) / 10000.0f;
+            mouseMiddle = mouseState.ScrollWheelValue;
         }
 
         internal GameObject FindGameObject(Body body)
@@ -275,10 +284,14 @@ namespace PackageLoss
             {
                 if (!drivingState) {
                     drivingState = true;
-                    camera.TrackingBody = car.Compound;
+                    Camera.TrackingBody = car.Compound;
                 }
                 car.Compound.LinearVelocity += new Vector2(carPower, 0.0f);
             }
+            if (keyboardState.IsKeyDown(Keys.Q))
+                Camera.Position += new Vector2(0f, 0.1f);
+            if (keyboardState.IsKeyDown(Keys.A))
+                Camera.Position -= new Vector2(0f, 0.1f);
         }
 
     }
