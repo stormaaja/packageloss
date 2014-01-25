@@ -209,12 +209,15 @@ namespace PackageLoss
                             moveDelta = movingObject.Compound.Position - mouseInWorld;
                         }
                         mouseJoint = JointFactory.CreateFixedMouseJoint(World, gameObject.Compound, mouseInWorld);
+                        mouseJoint.CollideConnected = true;
+                        gameObject.Compound.Awake = true;
                     }
                 }
                 else
                 {
                     if (mouseState.RightButton == ButtonState.Pressed)
                         movingObject.Compound.Rotation += moveSpeed.X / 10.0f;
+                    mouseJoint.WorldAnchorB = mouseInWorld;
                     //movingObject.Compound.Position = mouseInWorld + moveDelta;                 
                 }
             }
@@ -222,7 +225,11 @@ namespace PackageLoss
             if (movingObject != null && mouseState.LeftButton == ButtonState.Released)
             {
                 movingObject.Compound.LinearVelocity = -moveSpeed;
-                World.RemoveJoint(mouseJoint);
+                if (mouseJoint != null)
+                {
+                    World.RemoveJoint(mouseJoint);
+                    mouseJoint = null;
+                }
                 movingObject = null;
             }
         }
