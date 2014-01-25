@@ -3,6 +3,7 @@ using FarseerPhysics.Common;
 using FarseerPhysics.Common.Decomposition;
 using FarseerPhysics.Common.PolygonManipulation;
 using FarseerPhysics.Dynamics;
+using FarseerPhysics.Dynamics.Joints;
 using FarseerPhysics.Factories;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -49,6 +50,7 @@ namespace PackageLoss
         bool drivingState = false;
         GameObject car, carBridge;
         //Rectangle bottomRectangle;
+        Joint mouseJoint;
         
         Camera2D camera;
         public Game1 Game { get; set; }
@@ -120,7 +122,7 @@ namespace PackageLoss
             carBridge = FindGameObject("Sprinter2_luukku");
             carBridge.Compound.Position = new Vector2(ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Width / 4f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f) - ConvertUnits.ToSimUnits(80.0f));
             carBridge.Compound.CollisionGroup = 1;
-            JointFactory.CreateAngleJoint(World, car.Compound, carBridge.Compound);
+            JointFactory.CreateRevoluteJoint(World, car.Compound, carBridge.Compound, Vector2.Zero);
 
             GameObject bottom = FindGameObject("bottom");
             bottom.Compound.Position = new Vector2(ConvertUnits.ToSimUnits(2500f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f - 150f));
@@ -206,19 +208,21 @@ namespace PackageLoss
                             movingObject = gameObject;
                             moveDelta = movingObject.Compound.Position - mouseInWorld;
                         }
+                        mouseJoint = JointFactory.CreateFixedMouseJoint(World, gameObject.Compound, mouseInWorld);
                     }
                 }
                 else
                 {
                     if (mouseState.RightButton == ButtonState.Pressed)
                         movingObject.Compound.Rotation += moveSpeed.X / 10.0f;
-                    movingObject.Compound.Position = mouseInWorld + moveDelta;                    
+                    //movingObject.Compound.Position = mouseInWorld + moveDelta;                 
                 }
             }
 
             if (movingObject != null && mouseState.LeftButton == ButtonState.Released)
             {
                 movingObject.Compound.LinearVelocity = -moveSpeed;
+                World.RemoveJoint(mouseJoint);
                 movingObject = null;
             }
         }
