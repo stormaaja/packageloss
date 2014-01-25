@@ -18,18 +18,24 @@ namespace PackageLoss
     internal class GameScreen : BaseScreen
     {
         readonly String[] textureFilenames = new String[] {
+            "anvil",
             "basketBall01",
             "basketBall02",
+            "Cat1",
             "chainsaw",
+            "clownhat",
+            "coffeeBrewer",
             "crystal",
             "football",
+            "goo",
             "pillow01",
+            "shovel02",
             "skates",
             "sword",
             "table",
             "tv",
-            "Cat1",
             "washingMachine",
+            "woodenBox",            
             "Sprinter2_ulko",
             //"Sprinter2_ulko_alfa",
             "Sprinter2_luukku",
@@ -38,7 +44,7 @@ namespace PackageLoss
         };
         GameObject movingObject = null, cursor;
         Vector2 moveSpeed;
-        Vector2 mouseInWorld, mouseOnScreen, mouseFix = new Vector2(40, 32);
+        Vector2 mouseInWorld, mouseOnScreen, mouseFix = new Vector2(20, 16);
         Vector2 moveDelta;
         protected World World;
         Body HiddenBody;
