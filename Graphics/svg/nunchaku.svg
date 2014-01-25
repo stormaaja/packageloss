@@ -15,7 +15,10 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="nunchaku.svg">
+   sodipodi:docname="nunchaku.svg"
+   inkscape:export-filename="C:\Users\Mira\Documents\GameJam\packageloss\Graphics\png2x\nunchaku.png"
+   inkscape:export-xdpi="7.373044"
+   inkscape:export-ydpi="7.373044">
   <defs
      id="defs4">
     <linearGradient
@@ -344,9 +347,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.35"
-     inkscape:cx="-14.787826"
-     inkscape:cy="467.86624"
+     inkscape:zoom="0.7"
+     inkscape:cx="-26.32939"
+     inkscape:cy="345.17905"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
