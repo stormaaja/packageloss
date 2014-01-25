@@ -97,7 +97,7 @@ namespace PackageLoss
             background = Game.Content.Load<Texture2D>("background");
             gameObjects = new List<GameObject>();
             World = new World(new Vector2(0f, 9.82f));
-            mouseTexture = Game.Content.Load<Texture2D>("Mouse-cursor-hand-pointer.png");
+            mouseTexture = Game.Content.Load<Texture2D>("Mouse-cursor-hand-pointer");
             Camera = new Camera2D(Game.GraphicsDevice);
             
             HiddenBody = BodyFactory.CreateBody(World, Vector2.Zero);
@@ -141,6 +141,7 @@ namespace PackageLoss
             bottom.Compound.Position = Camera.ConvertScreenToWorld(new Vector2(3500f, Game.Window.ClientBounds.Height - 200f));
             bottom.Compound.BodyType = BodyType.Static;
             bottom.Compound.CollisionGroup = 1;
+            
 
             //cursor = FindGameObject("Mouse-cursor-hand-pointer");
             //cursor.Compound.CollisionGroup = 4;
