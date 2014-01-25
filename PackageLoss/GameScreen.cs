@@ -65,13 +65,23 @@ namespace PackageLoss
             //load texture that will represent the physics body
             textures = new Texture2D[] {
                 Game.Content.Load<Texture2D>("basketBall01"),
-
+                Game.Content.Load<Texture2D>("basketBall02"),
+                Game.Content.Load<Texture2D>("chainsaw"),
+                Game.Content.Load<Texture2D>("crystal"),
+                Game.Content.Load<Texture2D>("football"),
+                Game.Content.Load<Texture2D>("pillow01"),
+                Game.Content.Load<Texture2D>("skates"),
+                Game.Content.Load<Texture2D>("sword"),
+                Game.Content.Load<Texture2D>("table"),
+                Game.Content.Load<Texture2D>("tv"),
+                Game.Content.Load<Texture2D>("washingMachine"),
             };
-            AddGameObject(textures[0]);
-            GameObject gameObject = AddGameObject(textures[0]);
-            gameObject.Compound.Position = new Vector2(2.0f, 2.0f);
-
-            
+            Random rand = new Random();
+            foreach (Texture2D texture in textures)
+            {
+                AddGameObject(texture).Compound.Position = new Vector2((rand.Next(40) - 20) / 100.0f, (rand.Next(40) - 20) / 100.0f);
+            }
+                        
             bottom = BodyFactory.CreateRectangle(World, Game.Window.ClientBounds.Width, 1.0f, 10.0f);
             bottomRectangle = new Rectangle(0, 0, Game.Window.ClientBounds.Width, 10);
             bottom.Position = new Vector2(-20.0f, 10.0f);

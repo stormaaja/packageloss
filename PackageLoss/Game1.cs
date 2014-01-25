@@ -24,10 +24,12 @@ namespace PackageLoss
             : base()
         {
             graphics = new GraphicsDeviceManager(this);
+            graphics.PreferredBackBufferWidth = 1920;
+            graphics.PreferredBackBufferHeight = 1080;
             Content.RootDirectory = "Content";
-            ConvertUnits.SetDisplayUnitToSimUnitRatio(24f);
+            ConvertUnits.SetDisplayUnitToSimUnitRatio(24);
             IsFixedTimeStep = true;
-            graphics.IsFullScreen = false;
+            graphics.IsFullScreen = true;
             
         }
 
