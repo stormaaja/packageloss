@@ -14,7 +14,7 @@ using System.Text;
 
 namespace PackageLoss
 {
-    internal class GameScreen
+    internal class GameScreen : BaseScreen
     {
         readonly String[] textureFilenames = new String[] {
             "basketBall01",
@@ -49,6 +49,11 @@ namespace PackageLoss
         public Game1 Game { get; set; }
 
         public GameScreen(Game1 game)
+        {
+            SetGame(game);
+        }
+
+        public void SetGame(Game1 game)
         {
             this.Game = game;
         }
@@ -101,8 +106,11 @@ namespace PackageLoss
             // Special characterics for objects
             FindGameObject("basketBall01").Compound.Restitution = FindGameObject("basketBall02").Compound.Restitution = FindGameObject("football").Compound.Restitution = 0.8f;
             car = FindGameObject("sprinter");
-            car.Compound.BodyType = BodyType.Dynamic;
-            car.Compound.Position = new Vector2(ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Width / 4f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f));
+            car.Compound.BodyType = BodyType.Static;
+            car.Compound.Position = new Vector2(ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Width / 4f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f) - ConvertUnits.ToSimUnits(80.0f));
+            car.Compound.CollisionGroup = 1;
+            car.Compound.IgnoreCCD = true;
+            car.Compound.OnCollision -= Compound_OnCollision;
         }
 
         public GameObject AddGameObject(Texture2D texture)
@@ -111,6 +119,7 @@ namespace PackageLoss
             gameObject.Compound.OnCollision += Compound_OnCollision;
             gameObjects.Add(gameObject);
             gameObject.Name = texture.Name;
+            gameObject.Compound.CollisionGroup = 2;
             return gameObject;
         }
 
@@ -142,7 +151,7 @@ namespace PackageLoss
             return scale;
         }
 
-        internal void Update(GameTime gameTime)
+        public void Update(GameTime gameTime)
         {
             World.Step(Math.Min((float)gameTime.ElapsedGameTime.TotalSeconds, (1f / 30f)));
             foreach (GameObject gameObject in gameObjects)
@@ -153,7 +162,7 @@ namespace PackageLoss
             camera.Update(gameTime);
         }
 
-        internal void HandleMouse(MouseState mouseState, GameTime gameTime)
+        public void HandleMouse(MouseState mouseState, GameTime gameTime)
         {
             if (mouseState.LeftButton == ButtonState.Pressed)
             {                
