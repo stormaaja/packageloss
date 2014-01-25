@@ -16,6 +16,19 @@ namespace PackageLoss
 {
     internal class GameScreen
     {
+        readonly String[] textureFilenames = new String[] {
+            "basketBall01",
+            "basketBall02",
+            "chainsaw",
+            "crystal",
+            "football",
+            "pillow01",
+            "skates",
+            "sword",
+            "table",
+            "tv",
+            "washingMachine",
+        };
         GameObject movingObject = null;
         Vector2 moveSpeed;
         Vector2 mouseInWorld;
@@ -64,19 +77,12 @@ namespace PackageLoss
             camera = new Camera2D(Game.GraphicsDevice);
             HiddenBody = BodyFactory.CreateBody(World, Vector2.Zero);
             //load texture that will represent the physics body
-            textures = new Texture2D[] {
-                Game.Content.Load<Texture2D>("basketBall01"),
-                Game.Content.Load<Texture2D>("basketBall02"),
-                Game.Content.Load<Texture2D>("chainsaw"),
-                Game.Content.Load<Texture2D>("crystal"),
-                Game.Content.Load<Texture2D>("football"),
-                Game.Content.Load<Texture2D>("pillow01"),
-                Game.Content.Load<Texture2D>("skates"),
-                Game.Content.Load<Texture2D>("sword"),
-                Game.Content.Load<Texture2D>("table"),
-                Game.Content.Load<Texture2D>("tv"),
-                Game.Content.Load<Texture2D>("washingMachine"),
-            };
+            textures = new Texture2D[textureFilenames.Length];
+            for (int i = 0; i < textureFilenames.Length; i++)
+            {
+                textures[i] = Game.Content.Load<Texture2D>(textureFilenames[i]);
+                textures[i].Name = textureFilenames[i]; // XNA hack
+            }
             float screenWidth = ConvertUnits.ToSimUnits(Game.GraphicsDevice.Viewport.Height), screenHeight = ConvertUnits.ToSimUnits(Game.GraphicsDevice.Viewport.Width);
             Random rand = new Random();
             foreach (Texture2D texture in textures)
