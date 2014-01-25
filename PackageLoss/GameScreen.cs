@@ -21,6 +21,7 @@ namespace PackageLoss
         protected World World;
         Body HiddenBody;
         Texture2D background;
+        Texture2D[] textures;
         Rectangle bgRectangle;
         List<GameObject> gameObjects;
         Body bottom;
@@ -63,17 +64,27 @@ namespace PackageLoss
             camera = new Camera2D(Game.GraphicsDevice);
             HiddenBody = BodyFactory.CreateBody(World, Vector2.Zero);
             //load texture that will represent the physics body
-            GameObject go1 = new GameObject(this, Game.Content.Load<Texture2D>("basketBall01"), World);
-            go1.Compound.OnCollision += Compound_OnCollision;
-            gameObjects.Add(go1);
-            GameObject go2 = new GameObject(this, Game.Content.Load<Texture2D>("basketBall01"), World);
-            go2.Compound.OnCollision += Compound_OnCollision;
-            gameObjects.Add(go2);
+            textures = new Texture2D[] {
+                Game.Content.Load<Texture2D>("basketBall01"),
+
+            };
+            AddGameObject(textures[0]);
+            GameObject gameObject = AddGameObject(textures[0]);
+            gameObject.Compound.Position = new Vector2(2.0f, 2.0f);
+
             testTexture = Game.Content.Load<Texture2D>("goo");
             bottom = BodyFactory.CreateRectangle(World, Game.Window.ClientBounds.Width, 1.0f, 10.0f);
             bottomRectangle = new Rectangle(0, 0, Game.Window.ClientBounds.Width, 10);
             bottom.Position = new Vector2(-20.0f, 10.0f);
             bottom.OnCollision += Compound_OnCollision;
+        }
+
+        public GameObject AddGameObject(Texture2D texture)
+        {
+            GameObject gameObject = new GameObject(this, texture, World);
+            gameObject.Compound.OnCollision += Compound_OnCollision;
+            gameObjects.Add(gameObject);
+            return gameObject;
         }
 
         bool Compound_OnCollision(Fixture fixtureA, Fixture fixtureB, FarseerPhysics.Dynamics.Contacts.Contact contact)
@@ -83,7 +94,7 @@ namespace PackageLoss
 
         public void Draw(GameTime gameTime)
         {
-            Game.SpriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.Opaque, SamplerState.LinearWrap, DepthStencilState.Default, RasterizerState.CullNone);
+            Game.SpriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.Opaque, null, DepthStencilState.Default, RasterizerState.CullNone);
             Game.SpriteBatch.Draw(background, Vector2.Zero, bgRectangle, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
             Game.SpriteBatch.End();
 
@@ -91,7 +102,7 @@ namespace PackageLoss
             {
                 gameObject.Draw(Game.SpriteBatch, camera);
             }
-            Game.SpriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.Opaque, SamplerState.LinearWrap, DepthStencilState.Default, RasterizerState.CullNone, null, camera.View);
+            Game.SpriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.Opaque, null, DepthStencilState.Default, RasterizerState.CullNone, null, camera.View);
             Game.SpriteBatch.Draw(testTexture, ConvertUnits.ToDisplayUnits(bottom.Position), bottomRectangle, Color.White, bottom.Rotation, Vector2.Zero, 1.0f, SpriteEffects.None, 0f);
             Game.SpriteBatch.End();
         }
