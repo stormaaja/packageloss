@@ -26,7 +26,6 @@ namespace PackageLoss
         List<GameObject> gameObjects;
         Body bottom;
         Rectangle bottomRectangle;
-        Texture2D testTexture;
         
         Camera2D camera;
         public Game1 Game { get; set; }
@@ -72,7 +71,7 @@ namespace PackageLoss
             GameObject gameObject = AddGameObject(textures[0]);
             gameObject.Compound.Position = new Vector2(2.0f, 2.0f);
 
-            testTexture = Game.Content.Load<Texture2D>("goo");
+            
             bottom = BodyFactory.CreateRectangle(World, Game.Window.ClientBounds.Width, 1.0f, 10.0f);
             bottomRectangle = new Rectangle(0, 0, Game.Window.ClientBounds.Width, 10);
             bottom.Position = new Vector2(-20.0f, 10.0f);
@@ -95,16 +94,14 @@ namespace PackageLoss
         public void Draw(GameTime gameTime)
         {
             Game.SpriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.Opaque, null, DepthStencilState.Default, RasterizerState.CullNone);
-            Game.SpriteBatch.Draw(background, Vector2.Zero, bgRectangle, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+            Game.SpriteBatch.Draw(background, Vector2.Zero, bgRectangle, Color.White, 0, Vector2.Zero, 4.0f, SpriteEffects.None, 0);
             Game.SpriteBatch.End();
 
             foreach (GameObject gameObject in gameObjects)
             {
                 gameObject.Draw(Game.SpriteBatch, camera);
             }
-            Game.SpriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.Opaque, null, DepthStencilState.Default, RasterizerState.CullNone, null, camera.View);
-            Game.SpriteBatch.Draw(testTexture, ConvertUnits.ToDisplayUnits(bottom.Position), bottomRectangle, Color.White, bottom.Rotation, Vector2.Zero, 1.0f, SpriteEffects.None, 0f);
-            Game.SpriteBatch.End();
+            
         }
 
 
