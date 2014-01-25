@@ -28,7 +28,9 @@ namespace PackageLoss
             "table",
             "tv",
             "washingMachine",
-            "sprinter",
+            "Sprinter2_ulko",
+            //"Sprinter2_ulko_alfa",
+            "Sprinter2_luukku",
             "bottom",
             //"Mouse-cursor-hand-pointer"
         };
@@ -45,7 +47,7 @@ namespace PackageLoss
         //Body bottom;
         readonly float minScale = 0.4f, maxScale = 1.0f, carPower = 0.3f;
         bool drivingState = false;
-        GameObject car;
+        GameObject car, carBridge;
         //Rectangle bottomRectangle;
         
         Camera2D camera;
@@ -108,12 +110,17 @@ namespace PackageLoss
 
             // Special characterics for objects
             FindGameObject("basketBall01").Compound.Restitution = FindGameObject("basketBall02").Compound.Restitution = FindGameObject("football").Compound.Restitution = 0.8f;
-            car = FindGameObject("sprinter");
+            car = FindGameObject("Sprinter2_ulko");
             car.Compound.BodyType = BodyType.Dynamic;
             car.Compound.Position = new Vector2(ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Width / 4f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f) - ConvertUnits.ToSimUnits(80.0f));
             car.Compound.CollisionGroup = 1;
             car.Compound.IgnoreCCD = true;
             car.Compound.OnCollision -= Compound_OnCollision;
+
+            carBridge = FindGameObject("Sprinter2_luukku");
+            carBridge.Compound.Position = new Vector2(ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Width / 4f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f) - ConvertUnits.ToSimUnits(80.0f));
+            carBridge.Compound.CollisionGroup = 1;
+            JointFactory.CreateAngleJoint(World, car.Compound, carBridge.Compound);
 
             GameObject bottom = FindGameObject("bottom");
             bottom.Compound.Position = new Vector2(ConvertUnits.ToSimUnits(2500f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f - 150f));
