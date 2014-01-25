@@ -80,8 +80,10 @@ namespace PackageLoss
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-            screens[selectedScreen].Update(gameTime);
             screens[selectedScreen].HandleMouse(Mouse.GetState(), gameTime);
+            screens[selectedScreen].HandleKeyboard(Keyboard.GetState(), gameTime);
+            screens[selectedScreen].Update(gameTime);
+            
             base.Update(gameTime);
         }
 
