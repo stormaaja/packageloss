@@ -18,7 +18,7 @@ namespace PackageLoss
     {
         GraphicsDeviceManager graphics;
         internal SpriteBatch SpriteBatch;
-        int selectedScreen = 0;
+        int selectedScreen = 1;
 
         BaseScreen[] screens = new BaseScreen[2];
 
@@ -69,6 +69,13 @@ namespace PackageLoss
         protected override void UnloadContent()
         {
             // TODO: Unload any non ContentManager content here
+        }
+
+        public void SelectScreen(int screenNumber)
+        {
+            this.selectedScreen = screenNumber;
+            screens[screenNumber].LoadContent();
+            
         }
 
         /// <summary>
