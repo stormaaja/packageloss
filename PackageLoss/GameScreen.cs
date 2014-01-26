@@ -293,7 +293,7 @@ namespace PackageLoss
                 if (movingObject == null)
                 {
                     Fixture fixture = World.TestPoint(mouseInWorld);
-                    if (fixture != null)
+                    if (fixture != null && fixture.CollisionGroup != 1)
                     {
                         GameObject gameObject = FindGameObject(fixture.Body);
                         if (gameObject != null)
