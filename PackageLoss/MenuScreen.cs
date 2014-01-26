@@ -106,6 +106,11 @@ namespace PackageLoss
         {
         }
 
+        public void StartScreen()
+        {
+
+        }
+
     }
 }
 

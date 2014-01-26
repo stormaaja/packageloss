@@ -195,6 +195,7 @@ namespace PackageLoss
             carBridge = FindGameObject("Sprinter2_luukku");
             carBridge.Compound.Position = Camera.ConvertScreenToWorld(carStart + tireAxel2 - new Vector2(220f, 180f));
             carBridge.Compound.CollisionGroup = 1;
+            //carBridge.Compound.LocalCenter = ConvertUnits.ToSimUnits(new Vector2(0f, -carBridge.PolygonTexture.Height / 2f));
             JointFactory.CreateRevoluteJoint(World, car.Compound, carBridge.Compound, Vector2.Zero);
             //JointFactory.CreateRevoluteJoint(World, car.Compound, carBridge.Compound, new Vector2(0f, -50f));
             //JointFactory.CreateAngleJoint(World, car.Compound, carBridge.Compound).TargetAngle = 90f;
@@ -366,5 +367,9 @@ namespace PackageLoss
                 Camera.Position -= new Vector2(0f, 0.1f);
         }
 
+        public void StartScreen()
+        {
+
+        }
     }
 }
