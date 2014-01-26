@@ -18,7 +18,7 @@ namespace PackageLoss
     {
         GraphicsDeviceManager graphics;
         internal SpriteBatch SpriteBatch;
-        int selectedScreen = 0;
+        int selectedScreen = 1;
 
         BaseScreen[] screens;
 
@@ -77,7 +77,7 @@ namespace PackageLoss
         {
             this.selectedScreen = screenNumber;
             screens[screenNumber].LoadContent();
-            
+            screens[screenNumber].StartScreen();
         }
 
         /// <summary>

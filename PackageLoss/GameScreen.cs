@@ -7,6 +7,7 @@ using FarseerPhysics.Dynamics;
 using FarseerPhysics.Dynamics.Joints;
 using FarseerPhysics.Factories;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -32,13 +33,14 @@ namespace PackageLoss
         Rectangle bgRectangle;
         Dictionary<string, GameObject> gameObjects;
         //Body bottom;
-        readonly float minScale = 0.4f, maxScale = 1.0f, carPower = 2f, minZoom = 0.7f;
+        readonly float minScale = 0.4f, maxScale = 1.0f, carPower = 4f, minZoom = 0.7f;
         bool drivingState = false;
         GameObject car, carBridge;
         //Rectangle bottomRectangle;
         Texture2D mouseTexture;
         Joint mouseJoint;
-        float acceleration, maxSpeed = 40f;
+        float acceleration, maxSpeed = 100f;
+        SoundEffect soundEffectMusic;
 
         public Camera2D Camera { get; set; }
         public Game1 Game { get; set; }
@@ -107,11 +109,9 @@ namespace PackageLoss
             tileTextures = new Dictionary<string, Texture2D> {                
                 { "downhillBegin", Game.Content.Load<Texture2D>("Tiles/downhillBegin")},
                 { "downHill01", Game.Content.Load<Texture2D>("Tiles/downHill01") },
-                { "downhillGentle01", Game.Content.Load<Texture2D>("Tiles/downhillGentle01")},
-                { "downhillGentle02", Game.Content.Load<Texture2D>("Tiles/downhillGentle02")},                
+                { "downhillGentle", Game.Content.Load<Texture2D>("Tiles/downhillGentle")},      
                 { "flat01", Game.Content.Load<Texture2D>("Tiles/flat01")},
-                { "uphillGentle01", Game.Content.Load<Texture2D>("Tiles/uphillGentle01")},
-                { "uphillGentle02", Game.Content.Load<Texture2D>("Tiles/uphillGentle02")},
+                { "uphillGentle", Game.Content.Load<Texture2D>("Tiles/uphillGentle")},
                 { "uphill01", Game.Content.Load<Texture2D>("Tiles/uphill01")},                
                 { "uphillEnd", Game.Content.Load<Texture2D>("Tiles/uphillEnd")},
             };
@@ -147,12 +147,12 @@ namespace PackageLoss
             tire1.Compound.CollisionGroup = 1;
             frontWheelJoint = JointFactory.CreateWheelJoint(World, car.Compound, tire1.Compound, Vector2.UnitY);
             frontWheelJoint.MaxMotorTorque = 50f;
-            frontWheelJoint.MotorEnabled = false;
+            frontWheelJoint.MotorEnabled = true;
             frontWheelJoint.Frequency = 4.0f;
             frontWheelJoint.DampingRatio = 0.7f;
             tire2 = AddGameObject(tire1.PolygonTexture, "Sprinter2_rengas_2"); // TODO create method with fixture
             tire2.Compound.CreateFixture(wheelShape);
-            tire2.Compound.Friction = 0.95f;
+            tire2.Compound.Friction = 0.99f;
             Vector2 tireAxel2 = new Vector2(-tireAxel.X - 110f, tireAxel.Y);
             tire2.Compound.Position = Camera.ConvertScreenToWorld(carStart + tireAxel2);
             tire2.Compound.CollisionGroup = 1;
@@ -166,67 +166,61 @@ namespace PackageLoss
             carBridge.Compound.CollisionGroup = 1;
             JointFactory.CreateRevoluteJoint(World, car.Compound, carBridge.Compound, Vector2.Zero);
 
-            GenerateWorld("555555555555678888888889555556788888895555555122222222345555556788888889555512222222345555551222222345555555");
+            GenerateWorld("444444444444444444444566666674444444444444444444445666666674444444444444444444444456666666744444412222234444441222222234444444444");
             Camera.Zoom = 1.3f;
             Camera.MoveCamera(ConvertUnits.ToSimUnits(new Vector2(-150f, 150f)));
         }
 
-        public GameObject AddTile(Texture2D texture, String name, ref Vector2 pos, int direction)
+        public GameObject AddTile(Texture2D texture, String name, ref Vector2 pos, float offsetY, int direction)
         {
             GameObject go1 = AddGameObject(texture, name);
-            go1.Compound.Position = Camera.ConvertScreenToWorld(pos);
+            go1.Compound.Position = Camera.ConvertScreenToWorld(pos + new Vector2(0, offsetY / 2f));
             go1.Compound.BodyType = BodyType.Static;
             go1.Compound.CollisionGroup = 1;
-            pos += new Vector2(go1.PolygonTexture.Width, go1.PolygonTexture.Height * direction);
+            pos.X += go1.PolygonTexture.Width;
+            pos.Y += go1.PolygonTexture.Height * direction + offsetY / 2f;
             return go1;
         }
 
         /*
          * 1: downhillBegin
          * 2: downHill01
-         * 3: downhillGentle01
-         * 4: downhillGentle02
-         * 5: flat01
-         * 6: uphillGentle01
-         * 7: uphillGentle01
-         * 8: uphill01
-         * 9: uphillEnd
-         * 
+         * 3: downhillGentle
+         * 4: flat01
+         * 5: uphillGentle
+         * 6: uphill01
+         * 7: uphillEnd
+         * // DO NOT START WITH ANYTHING ELSE THAN FLAT
          */
         public void GenerateWorld(string tiles)
-        {
+        {            
             Vector2 pos = new Vector2(-200f, Game.GraphicsDevice.Viewport.Height);
+            GameObject lastObject = null;
             int id = 0;
             foreach (char c in tiles)
             {
                 switch (c)
                 {
                     case '1':
-                        AddTile(tileTextures["downhillBegin"], "tile_" + id, ref pos, 1);                        
+                        lastObject = AddTile(tileTextures["downhillBegin"], "tile_" + id, ref pos, 0f, 1);                        
                         break;
                     case '2':
-                        AddTile(tileTextures["downHill01"], "tile_" + id, ref pos, 1);
+                        lastObject = AddTile(tileTextures["downHill01"], "tile_" + id, ref pos, 0f, 1);
                         break;
                     case '3':
-                        AddTile(tileTextures["downhillGentle01"], "tile_" + id, ref pos, 1);
+                        lastObject = AddTile(tileTextures["downhillGentle"], "tile_" + id, ref pos, 0f, 1);
                         break;
                     case '4':
-                        AddTile(tileTextures["downhillGentle02"], "tile_" + id, ref pos, 0);
+                        lastObject = AddTile(tileTextures["flat01"], "tile_" + id, ref pos, 0f, 0);
                         break;
                     case '5':
-                        AddTile(tileTextures["flat01"], "tile_" + id, ref pos, 0);
+                        lastObject = AddTile(tileTextures["uphillGentle"], "tile_" + id, ref pos, -lastObject.PolygonTexture.Height, -1);
                         break;
                     case '6':
-                        AddTile(tileTextures["uphillGentle01"], "tile_" + id, ref pos, 0);
+                        lastObject = AddTile(tileTextures["uphill01"], "tile_" + id, ref pos, 0f, -1);
                         break;
                     case '7':
-                        AddTile(tileTextures["uphillGentle02"], "tile_" + id, ref pos, -1);
-                        break;
-                    case '8':
-                        AddTile(tileTextures["uphill01"], "tile_" + id, ref pos, -1);
-                        break;
-                    case '9':
-                        AddTile(tileTextures["uphillEnd"], "tile_" + id, ref pos, -1);
+                        lastObject = AddTile(tileTextures["uphillEnd"], "tile_" + id, ref pos, 0f, 0);
                         break;
                     default:
                         break;
@@ -293,11 +287,11 @@ namespace PackageLoss
                 frontWheelJoint.MotorSpeed = rearWheelJoint.MotorSpeed;
                 if (Math.Abs(rearWheelJoint.MotorSpeed) < maxSpeed * 0.06f)
                 {
-                    rearWheelJoint.MotorEnabled = false;
+                    rearWheelJoint.MotorEnabled = frontWheelJoint.MotorEnabled = false;
                 }
                 else
                 {
-                    rearWheelJoint.MotorEnabled = true;
+                    rearWheelJoint.MotorEnabled = frontWheelJoint.MotorEnabled = true;
                 }
             }
             Camera.Update(gameTime);
