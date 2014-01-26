@@ -204,7 +204,7 @@ namespace PackageLoss
             bottom.Compound.Position = Camera.ConvertScreenToWorld(new Vector2(3500f, Game.Window.ClientBounds.Height - 200f));
             bottom.Compound.BodyType = BodyType.Static;
             bottom.Compound.CollisionGroup = 1;
-
+            
             //cursor = FindGameObject("Mouse-cursor-hand-pointer");
             //cursor.Compound.CollisionGroup = 4;
             //cursor.Compound.CollisionCategories = Category.Cat30;

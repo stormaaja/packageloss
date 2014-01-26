@@ -46,7 +46,7 @@ namespace PackageLoss
         protected override void Initialize()
         {
             screens[0] = new GameScreen(this);
-
+            screens[1] = new MenuScreen(this);
             base.Initialize();
         }
 
