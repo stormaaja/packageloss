@@ -104,13 +104,15 @@ namespace PackageLoss
                 { "Sprinter2_rengas", Game.Content.Load<Texture2D>("Sprinter2_rengas")},
             };
 
-            tileTextures = new Dictionary<string, Texture2D> {
+            tileTextures = new Dictionary<string, Texture2D> {                
+                { "downhillBegin", Game.Content.Load<Texture2D>("Tiles/downhillBegin")},
                 { "downHill01", Game.Content.Load<Texture2D>("Tiles/downHill01") },
-                { "downhillBegin", Game.Content.Load<Texture2D>("Tiles/downHillBegin")},
-                { "downhillEnd", Game.Content.Load<Texture2D>("Tiles/downHillEnd")},
+                { "downhillGentle01", Game.Content.Load<Texture2D>("Tiles/downhillGentle01")},
+                { "downhillGentle02", Game.Content.Load<Texture2D>("Tiles/downhillGentle02")},                
                 { "flat01", Game.Content.Load<Texture2D>("Tiles/flat01")},
-                { "uphill01", Game.Content.Load<Texture2D>("Tiles/uphill01")},
-                { "uphillBegin", Game.Content.Load<Texture2D>("Tiles/uphillBegin")},
+                { "uphillGentle01", Game.Content.Load<Texture2D>("Tiles/uphillGentle01")},
+                { "uphillGentle02", Game.Content.Load<Texture2D>("Tiles/uphillGentle02")},
+                { "uphill01", Game.Content.Load<Texture2D>("Tiles/uphill01")},                
                 { "uphillEnd", Game.Content.Load<Texture2D>("Tiles/uphillEnd")},
             };
 
@@ -164,7 +166,7 @@ namespace PackageLoss
             carBridge.Compound.CollisionGroup = 1;
             JointFactory.CreateRevoluteJoint(World, car.Compound, carBridge.Compound, Vector2.Zero);
 
-            GenerateWorld("4444444444444566666674444444444412222222223444444444");
+            GenerateWorld("555555555555678888888889555556788888895555555122222222345555556788888889555512222222345555551222222345555555");
             Camera.Zoom = 1.3f;
             Camera.MoveCamera(ConvertUnits.ToSimUnits(new Vector2(-150f, 150f)));
         }
@@ -180,13 +182,16 @@ namespace PackageLoss
         }
 
         /*
-         * 1: downhill begin
-         * 2: downhill
-         * 3: downhill end
-         * 4: flat
-         * 5: uphill begin
-         * 6: uphill
-         * 7: uphill end
+         * 1: downhillBegin
+         * 2: downHill01
+         * 3: downhillGentle01
+         * 4: downhillGentle02
+         * 5: flat01
+         * 6: uphillGentle01
+         * 7: uphillGentle01
+         * 8: uphill01
+         * 9: uphillEnd
+         * 
          */
         public void GenerateWorld(string tiles)
         {
@@ -203,19 +208,25 @@ namespace PackageLoss
                         AddTile(tileTextures["downHill01"], "tile_" + id, ref pos, 1);
                         break;
                     case '3':
-                        AddTile(tileTextures["downhillEnd"], "tile_" + id, ref pos, 1);
+                        AddTile(tileTextures["downhillGentle01"], "tile_" + id, ref pos, 1);
                         break;
                     case '4':
-                        AddTile(tileTextures["flat01"], "tile_" + id, ref pos, 0);
+                        AddTile(tileTextures["downhillGentle02"], "tile_" + id, ref pos, 0);
                         break;
                     case '5':
-                        AddTile(tileTextures["uphillBegin"], "tile_" + id, ref pos, -1);
+                        AddTile(tileTextures["flat01"], "tile_" + id, ref pos, 0);
                         break;
                     case '6':
-                        AddTile(tileTextures["uphill01"], "tile_" + id, ref pos, -1);
+                        AddTile(tileTextures["uphillGentle01"], "tile_" + id, ref pos, 0);
                         break;
                     case '7':
-                        AddTile(tileTextures["uphillEnd"], "tile_" + id, ref pos, 0);
+                        AddTile(tileTextures["uphillGentle02"], "tile_" + id, ref pos, -1);
+                        break;
+                    case '8':
+                        AddTile(tileTextures["uphill01"], "tile_" + id, ref pos, -1);
+                        break;
+                    case '9':
+                        AddTile(tileTextures["uphillEnd"], "tile_" + id, ref pos, -1);
                         break;
                     default:
                         break;
