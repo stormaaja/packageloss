@@ -18,11 +18,14 @@ namespace PackageLoss
                 "Quit",
             };
 
+        TextureRect[] characters;
+
         SpriteFont font;
         Texture2D background;
         Rectangle bgRectangle;
-
+        bool selectingCharacter, loading = false, selected = false;
         Vector2 menuEntriesPosition;
+        Vector2 center;
 
         public Game1 Game { get; set; }
 
@@ -60,10 +63,17 @@ namespace PackageLoss
             bgRectangle = new Rectangle(0, 0, Game.Window.ClientBounds.Width, Game.Window.ClientBounds.Height);
             
             this.font = Game.Content.Load<SpriteFont>("Segoe UI Mono");
-
+            int startX = Game.GraphicsDevice.Viewport.Width / 2 - 500;
+            int startY = Game.GraphicsDevice.Viewport.Height / 2 - 100;
+            characters = new TextureRect[] {
+                new TextureRect() { Texture = Game.Content.Load<Texture2D>("Characters/anime"), Rectangle = new Rectangle(startX, startY, 200, 200) },
+                new TextureRect() { Texture = Game.Content.Load<Texture2D>("Characters/ninja"), Rectangle = new Rectangle(startX + 200, startY, 200, 200) },
+                new TextureRect() { Texture = Game.Content.Load<Texture2D>("Characters/pelle"), Rectangle = new Rectangle(startX + 400, startY, 200, 200) },
+                new TextureRect() { Texture = Game.Content.Load<Texture2D>("Characters/puutahuri"), Rectangle = new Rectangle(startX + 600, startY, 200, 200) },
+                new TextureRect() { Texture = Game.Content.Load<Texture2D>("Characters/yllatyskyykky"), Rectangle = new Rectangle(startX + 800, startY, 200, 200) },
+            };
             menuEntriesPosition = new Vector2(100, 100);
             
-
         }
 
         internal void DrawTexts()
@@ -82,7 +92,18 @@ namespace PackageLoss
         public void Draw(GameTime gameTime)
         {
             DrawBackground();
-            DrawTexts();
+            if (selectingCharacter)
+                DrawCharacterMenu();
+            else
+                DrawTexts();
+            if (selected)
+            {
+                Game.SpriteBatch.Begin();
+                Game.SpriteBatch.DrawString(font, "Loading...", Vector2.Zero, Color.Green);
+                Game.SpriteBatch.End();
+                loading = true;
+            }
+
         }
 
         private void DrawBackground()
@@ -92,23 +113,50 @@ namespace PackageLoss
             Game.SpriteBatch.End();
         }
 
+        public void DrawCharacterMenu()
+        {
+            Game.SpriteBatch.Begin();
+            foreach (TextureRect character in characters)
+            {
+                Game.SpriteBatch.Draw(character.Texture, character.Rectangle, Color.White);
+            }
+            Game.SpriteBatch.End();
+        }
+
         public void Update(GameTime gameTime)
         {
-            
+            if (loading)
+            {
+                this.Game.SelectScreen(1);
+            }
         }
 
         public void HandleMouse(MouseState mouseState, GameTime gameTime)
         {
             if (mouseState.LeftButton == ButtonState.Pressed)
             {
-                // TODO check if mouse is hovering over an entry
-                for (int i = 0; i < menuEntries.Length; i++)
+                if (selectingCharacter)
                 {
-                    // TODO don't use constant int
-                    if (mouseState.Y > i + menuEntriesPosition.Y && mouseState.Y < i + (menuEntriesPosition.Y + 48))
+                    foreach (TextureRect charTexture in characters)
                     {
-                        // TODO id's should be enums
-                        this.Game.SelectScreen(1);
+                        if (charTexture.Rectangle.Contains(mouseState.X, mouseState.Y))
+                        {                            
+                            this.Game.SetCharacter(charTexture.Texture);
+                            selected = true;
+                            break;
+                        }
+                    }
+                }
+                else { 
+                // TODO check if mouse is hovering over an entry
+                    for (int i = 0; i < menuEntries.Length; i++)
+                    {
+                        // TODO don't use constant int
+                        if (mouseState.Y > i + menuEntriesPosition.Y && mouseState.Y < i + (menuEntriesPosition.Y + 48))
+                        {
+                            // TODO id's should be enums
+                            selectingCharacter = true;
+                        }
                     }
                 }
             }
@@ -123,6 +171,12 @@ namespace PackageLoss
 
         }
 
+    }
+
+    struct TextureRect
+    {
+        public Texture2D Texture;
+        public Rectangle Rectangle;
     }
 }
 
