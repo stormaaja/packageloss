@@ -107,8 +107,8 @@ namespace PackageLoss
                     // TODO don't use constant int
                     if (mouseState.Y > i + menuEntriesPosition.Y && mouseState.Y < i + (menuEntriesPosition.Y + 48))
                     {
-                        // TODO fix different 
-                        this.Game.SelectScreen(0);
+                        // TODO id's should be enums
+                        this.Game.SelectScreen(1);
                     }
                 }
             }

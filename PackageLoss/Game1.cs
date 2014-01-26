@@ -18,7 +18,7 @@ namespace PackageLoss
     {
         GraphicsDeviceManager graphics;
         internal SpriteBatch SpriteBatch;
-        int selectedScreen = 1;
+        int selectedScreen = 0;
 
         BaseScreen[] screens = new BaseScreen[2];
 
