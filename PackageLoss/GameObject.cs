@@ -76,7 +76,7 @@ namespace PackageLoss
             }
             Compound.Inertia = 100.0f;
 
-            Compound.Mass = PolygonTexture.Width * PolygonTexture.Height / 100f;
+            //Compound.Mass = PolygonTexture.Width * PolygonTexture.Height / 1000f;
         }
 
         public void Draw(SpriteBatch spriteBatch, Camera2D camera)

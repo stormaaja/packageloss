@@ -1,4 +1,5 @@
 ﻿using FarseerPhysics;
+using FarseerPhysics.Collision.Shapes;
 using FarseerPhysics.Common;
 using FarseerPhysics.Common.Decomposition;
 using FarseerPhysics.Common.PolygonManipulation;
@@ -24,18 +25,20 @@ namespace PackageLoss
         Vector2 mouseInWorld, mouseOnScreen, mouseFix = new Vector2(20, 16);
         Vector2 moveDelta;
         protected World World;
+        WheelJoint frontWheelJoint, rearWheelJoint;
         int mouseMiddle;
         Body HiddenBody;
         Texture2D background;
         Rectangle bgRectangle;
         Dictionary<string, GameObject> gameObjects;
         //Body bottom;
-        readonly float minScale = 0.4f, maxScale = 1.0f, carPower = 0.3f, minZoom = 0.7f;
+        readonly float minScale = 0.4f, maxScale = 1.0f, carPower = 2f, minZoom = 0.7f;
         bool drivingState = false;
         GameObject car, carBridge;
         //Rectangle bottomRectangle;
         Texture2D mouseTexture;
         Joint mouseJoint;
+        float acceleration, maxSpeed = 40f;
 
         public Camera2D Camera { get; set; }
         public Game1 Game { get; set; }
@@ -100,117 +103,121 @@ namespace PackageLoss
                 { "Sprinter2_ulko", Game.Content.Load<Texture2D>("Sprinter2_ulko")},
                 { "Sprinter2_luukku", Game.Content.Load<Texture2D>("Sprinter2_luukku")},
                 { "Sprinter2_rengas", Game.Content.Load<Texture2D>("Sprinter2_rengas")},
-                { "bottom", Game.Content.Load<Texture2D>("bottom")},
             };
 
-
+            tileTextures = new Dictionary<string, Texture2D> {
+                { "downHill01", Game.Content.Load<Texture2D>("Tiles/downHill01") },
+                { "downhillBegin", Game.Content.Load<Texture2D>("Tiles/downHillBegin")},
+                { "downhillEnd", Game.Content.Load<Texture2D>("Tiles/downHillEnd")},
+                { "flat01", Game.Content.Load<Texture2D>("Tiles/flat01")},
+                { "uphill01", Game.Content.Load<Texture2D>("Tiles/uphill01")},
+                { "uphillBegin", Game.Content.Load<Texture2D>("Tiles/uphillBegin")},
+                { "uphillEnd", Game.Content.Load<Texture2D>("Tiles/uphillEnd")},
+            };
             
             float screenWidth = ConvertUnits.ToSimUnits(Game.GraphicsDevice.Viewport.Height), screenHeight = ConvertUnits.ToSimUnits(Game.GraphicsDevice.Viewport.Width);
-            Random rand = new Random();
+            float areaWidth = Game.GraphicsDevice.Viewport.Width / 2f, x = 0f;
+            Vector2 objPos = new Vector2(0f, Game.GraphicsDevice.Viewport.Height - tileTextures["flat01"].Height);
             foreach (KeyValuePair<string, Texture2D> textureKV in objectTextures)
             {
-                AddGameObject(textureKV.Value).Compound.Position = new Vector2((float)(rand.NextDouble() - 0.5) * screenWidth, (float)(rand.NextDouble() - 0.5) * screenHeight);
+                AddGameObject(textureKV.Value).Compound.Position = Camera.ConvertScreenToWorld(objPos);
+                x += textureKV.Value.Width;
+                objPos = new Vector2(x % areaWidth, x / areaWidth);
             }
             mouseMiddle = Mouse.GetState().ScrollWheelValue;
-            //bottom = BodyFactory.CreateRectangle(World, ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Width * 10.0f), ConvertUnits.ToSimUnits(20f), 10.0f);
-            //bottomRectangle = new Rectangle(0, 0, Game.Window.ClientBounds.Width, 10);
-            //bottom.Position = new Vector2(ConvertUnits.ToSimUnits(0f), ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Height / 2f));
-            //bottom.OnCollision += Compound_OnCollision;
-
-            // Special characterics for objects
-            //FindGameObject("basketBall01").Compound.Restitution = FindGameObject("basketBall02").Compound.Restitution = FindGameObject("football").Compound.Restitution = 0.8f;
-            Vector2 carStart = new Vector2(Game.Window.ClientBounds.Width / 2f + 130f, 50f);
             car = FindGameObject("Sprinter2_ulko");
-            car.Compound.BodyType = BodyType.Dynamic;
+            Vector2 carStart = new Vector2(Game.Window.ClientBounds.Width / 2f + 130f, Game.GraphicsDevice.Viewport.Height - tileTextures["flat01"].Height - 30f);
             car.Compound.Position = Camera.ConvertScreenToWorld(carStart);
             car.Compound.CollisionGroup = 1;
-            //car.Compound.IgnoreCCD = true;
-            //car.Compound.OnCollision -= Compound_OnCollision;
             car.Compound.Mass = 6000;
-            //axel = ConvertUnits.ToSimUnits(new Vector2(car.PolygonTexture.Width / 2 - 50f, 10f));
-
+            car.Compound.BodyType = BodyType.Static;
+            CircleShape wheelShape = new CircleShape(0.5f, 0.8f);
             tire1 = FindGameObject("Sprinter2_rengas");
-            tire1.Compound.Friction = 0.9f;
-            tire1.Compound.Mass = 20f;
+
+            tire1.Compound.CreateFixture(wheelShape);
+            tire1.Compound.Friction = 0.95f;
             Vector2 tireAxel = new Vector2(220f, 150f);
             tire1.Compound.Position = Camera.ConvertScreenToWorld(carStart + tireAxel);
             tire1.Compound.CollisionGroup = 1;
-            JointFactory.CreateRevoluteJoint(World, car.Compound, tire1.Compound, Vector2.Zero);
-
-            tire2 = AddGameObject(tire1.PolygonTexture, "Sprinter2_rengas_2");
-            tire2.Compound.Friction = 0.9f;
-            tire2.Compound.Mass = 20f;
-            Vector2 tireAxel2 = new Vector2(-tireAxel.X - 100f, tireAxel.Y);
+            frontWheelJoint = JointFactory.CreateWheelJoint(World, car.Compound, tire1.Compound, Vector2.UnitY);
+            frontWheelJoint.MaxMotorTorque = 50f;
+            frontWheelJoint.MotorEnabled = false;
+            frontWheelJoint.Frequency = 4.0f;
+            frontWheelJoint.DampingRatio = 0.7f;
+            tire2 = AddGameObject(tire1.PolygonTexture, "Sprinter2_rengas_2"); // TODO create method with fixture
+            tire2.Compound.CreateFixture(wheelShape);
+            tire2.Compound.Friction = 0.95f;
+            Vector2 tireAxel2 = new Vector2(-tireAxel.X - 110f, tireAxel.Y);
             tire2.Compound.Position = Camera.ConvertScreenToWorld(carStart + tireAxel2);
             tire2.Compound.CollisionGroup = 1;
-            JointFactory.CreateRevoluteJoint(World, car.Compound, tire2.Compound, Vector2.Zero);
-            //JointFactory.CreateRevoluteJoint(World, car.Compound, tire1.Compound, axis + new Vector2(0f, 1.2f), axis + new Vector2(0f, -1.2f)).Breakpoint = float.MaxValue;
-            //JointFactory.CreateWheelJoint(World, car.Compound, tire1.Compound, Vector2.Zero);
-            //JointFactory.CreateAngleJoint(World, car.Compound, tire1.Compound);
-            
-
-            //tire2 = FindGameObject("Sprinter2_rengas");
-            //tire1.Compound.Friction = 0.9f;
-            //tire2.Compound.Mass = 20f;
-            
-            //tire2.Compound.Position = car.Compound.Position - axis;
-            //tire2.Compound.CollisionGroup = 1;
-            //JointFactory.CreateWheelJoint(World, car.Compound, tire2.Compound, -axis, Vector2.UnitY, true);
-            //JointFactory.CreateRevoluteJoint(World, car.Compound, tire2.Compound, Vector2.Zero);
-            //tire1.Compound.IgnoreCollisionWith(car.Compound);
-            //JointFactory.CreateWheelJoint(World, car.Compound, tire1.Compound, axis);
-            
-            //WheelJoint wheelJoint1 = new WheelJoint(car.Compound, tire1.Compound, tire1.Compound.Position, axis, true);
-            //wheelJoint1.MotorSpeed = 0f;
-            //wheelJoint1.MaxMotorTorque = 20.0f;
-            //wheelJoint1.MotorEnabled = true;
-            //wheelJoint1.Frequency = 4.0f;
-            //wheelJoint1.DampingRatio = 0.7f;
-            //World.AddJoint(wheelJoint1);
-             
-
-            //tire2 = AddGameObject(tire1.PolygonTexture);
-            //tire2.Compound.Friction = 0.9f;
-            //Vector2 axis2 = ConvertUnits.ToSimUnits(new Vector2(150f, 10f));
-            //tire2.Compound.Position = car.Compound.Position + axis2;
-            //tire2.Compound.CollisionGroup = 5;
-            //tire2.Compound.IgnoreCollisionWith(car.Compound);
-            //gameObjects.Remove(tire2);
-            //JointFactory.CreateWheelJoint(World, car.Compound, tire2.Compound, Vector2.Zero);
-            //WheelJoint wheelJoint2 = new WheelJoint(car.Compound, tire2.Compound, tire2.Compound.Position, axis2, true);
-            //wheelJoint2.MotorSpeed = 0f;
-            //wheelJoint2.MaxMotorTorque = 20.0f;
-            //wheelJoint2.MotorEnabled = true;
-            //wheelJoint2.Frequency = 4.0f;
-            //wheelJoint2.DampingRatio = 0.7f;
-            //World.AddJoint(wheelJoint2);
-            //JointFactory.CreateWheelJoint(World, car.Compound, tire1.Compound, new Vector2(200f, 0f), true);
-            //JointFactory.CreateWheelJoint(World, car.Compound, AddGameObject(tire1.PolygonTexture, "Sprinter2_rengas_2").Compound, new Vector2(-200f, 0f)); 
-
-
+            rearWheelJoint = JointFactory.CreateWheelJoint(World, car.Compound, tire2.Compound, Vector2.UnitY);
+            rearWheelJoint.MaxMotorTorque = 100f;
+            rearWheelJoint.MotorEnabled = true;
+            rearWheelJoint.Frequency = 4.0f;
+            rearWheelJoint.DampingRatio = 0.7f;
             carBridge = FindGameObject("Sprinter2_luukku");
             carBridge.Compound.Position = Camera.ConvertScreenToWorld(carStart + tireAxel2 - new Vector2(220f, 180f));
             carBridge.Compound.CollisionGroup = 1;
-            //carBridge.Compound.LocalCenter = ConvertUnits.ToSimUnits(new Vector2(0f, -carBridge.PolygonTexture.Height / 2f));
             JointFactory.CreateRevoluteJoint(World, car.Compound, carBridge.Compound, Vector2.Zero);
-            //JointFactory.CreateRevoluteJoint(World, car.Compound, carBridge.Compound, new Vector2(0f, -50f));
-            //JointFactory.CreateAngleJoint(World, car.Compound, carBridge.Compound).TargetAngle = 90f;
-            //JointFactory.
 
-            GameObject bottom = FindGameObject("bottom");
-            bottom.Compound.Position = Camera.ConvertScreenToWorld(new Vector2(3500f, Game.Window.ClientBounds.Height - 200f));
-            bottom.Compound.BodyType = BodyType.Static;
-            bottom.Compound.CollisionGroup = 1;
-            
-            //cursor = FindGameObject("Mouse-cursor-hand-pointer");
-            //cursor.Compound.CollisionGroup = 4;
-            //cursor.Compound.CollisionCategories = Category.Cat30;
-            //cursor.Compound.IgnoreCCD = true;
-            //cursor.Compound.BodyType = BodyType.Kinematic;
-            //cursor.Compound.Mass = 0f;
+            GenerateWorld("4444444444444566666674444444444412222222223444444444");
             Camera.Zoom = 1.3f;
             Camera.MoveCamera(ConvertUnits.ToSimUnits(new Vector2(-150f, 150f)));
-            //Camera.TrackingBody = car.Compound;
+        }
+
+        public GameObject AddTile(Texture2D texture, String name, ref Vector2 pos, int direction)
+        {
+            GameObject go1 = AddGameObject(texture, name);
+            go1.Compound.Position = pos;
+            go1.Compound.BodyType = BodyType.Static;
+            go1.Compound.CollisionGroup = 1;
+            pos += ConvertUnits.ToSimUnits(new Vector2(go1.PolygonTexture.Width, go1.PolygonTexture.Height * direction));
+            return go1;
+        }
+
+        /*
+         * 1: downhill begin
+         * 2: downhill
+         * 3: downhill end
+         * 4: flat
+         * 5: uphill begin
+         * 6: uphill
+         * 7: uphill end
+         */
+        public void GenerateWorld(string tiles)
+        {
+            Vector2 pos = Camera.ConvertScreenToWorld(new Vector2(-200f, Game.GraphicsDevice.Viewport.Height));
+            int id = 0;
+            foreach (char c in tiles)
+            {
+                switch (c)
+                {
+                    case '1':
+                        AddTile(tileTextures["downhillBegin"], "tile_" + id, ref pos, 1);                        
+                        break;
+                    case '2':
+                        AddTile(tileTextures["downHill01"], "tile_" + id, ref pos, 1);
+                        break;
+                    case '3':
+                        AddTile(tileTextures["downhillEnd"], "tile_" + id, ref pos, 1);
+                        break;
+                    case '4':
+                        AddTile(tileTextures["flat01"], "tile_" + id, ref pos, 0);
+                        break;
+                    case '5':
+                        AddTile(tileTextures["uphillBegin"], "tile_" + id, ref pos, -1);
+                        break;
+                    case '6':
+                        AddTile(tileTextures["uphill01"], "tile_" + id, ref pos, -1);
+                        break;
+                    case '7':
+                        AddTile(tileTextures["uphillEnd"], "tile_" + id, ref pos, 0);
+                        break;
+                    default:
+                        break;
+                }
+                id++;
+            }
         }
 
         public GameObject AddGameObject(Texture2D texture, String name = null)
@@ -263,12 +270,19 @@ namespace PackageLoss
             }
             if (drivingState && Camera.Zoom > minZoom)
                 Camera.Zoom -= 0.01f;
-            //Matrix carMatrix = Matrix.CreateRotationZ(car.Compound.Rotation) * Matrix.CreateTranslation(new Vector3(car.Compound.Position, 0));
-            
-            //tire1.Compound.Position = Vector2.Transform(axel, carMatrix * Matrix.CreateTranslation(new Vector3(axel, 0)));
-            //tire1.Compound.Rotation += car.Compound.LinearVelocity.X;
-            //tire2.Compound.Position = Vector2.Transform(axel, carMatrix * Matrix.CreateTranslation(new Vector3(-axel * 2f, 0)));
-            //tire2.Compound.Rotation += car.Compound.LinearVelocity.X;
+             if (drivingState)
+            {
+                rearWheelJoint.MotorSpeed = Math.Sign(acceleration) * MathHelper.SmoothStep(0f, maxSpeed, Math.Abs(acceleration));
+                frontWheelJoint.MotorSpeed = rearWheelJoint.MotorSpeed;
+                if (Math.Abs(rearWheelJoint.MotorSpeed) < maxSpeed * 0.06f)
+                {
+                    rearWheelJoint.MotorEnabled = false;
+                }
+                else
+                {
+                    rearWheelJoint.MotorEnabled = true;
+                }
+            }
             Camera.Update(gameTime);
         }
 
@@ -276,7 +290,6 @@ namespace PackageLoss
         {
             mouseOnScreen = new Vector2(mouseState.X + 25, mouseState.Y + 30);
             Vector2 newMouseInWorld = Camera.ConvertScreenToWorld(mouseOnScreen);
-            //cursor.Compound.Position = newMouseInWorld;
             if (drivingState)
                 return;
             if (mouseState.LeftButton == ButtonState.Pressed)
@@ -302,16 +315,12 @@ namespace PackageLoss
                 }
                 else
                 {
-                    //if (mouseState.RightButton == ButtonState.Pressed)
-                        //movingObject.Compound.Rotation += moveSpeed.X / 10.0f;
                     mouseJoint.WorldAnchorB = mouseInWorld;
-                    //movingObject.Compound.Position = mouseInWorld + moveDelta;                 
-                }
+                 }
             }
 
             if (movingObject != null && mouseState.LeftButton == ButtonState.Released)
             {
-                //movingObject.Compound.LinearVelocity = -moveSpeed;
                 if (mouseJoint != null)
                 {
                     World.RemoveJoint(mouseJoint);
@@ -344,12 +353,20 @@ namespace PackageLoss
         {
             if (keyboardState.IsKeyDown(Keys.Up))
             {
-                if (!drivingState) {
+                if (!drivingState)
+                {
+                    car.Compound.BodyType = BodyType.Dynamic;
+                    //car.Compound.LinearVelocity += new Vector2(10f, 0f);
                     drivingState = true;
                     Camera.TrackingBody = car.Compound;
                 }
-                car.Compound.LinearVelocity += new Vector2(carPower, 0.0f);
+                acceleration = Math.Min(acceleration + (float)(carPower * gameTime.ElapsedGameTime.TotalSeconds), 1f);
+
             }
+            else if (keyboardState.IsKeyDown(Keys.Down))
+                acceleration = Math.Max(acceleration - (float)(carPower * gameTime.ElapsedGameTime.TotalSeconds), -1f);
+            else
+                acceleration = 0f;
             if (keyboardState.IsKeyDown(Keys.Q))
                 Camera.Position += new Vector2(0f, 0.1f);
             if (keyboardState.IsKeyDown(Keys.A))
