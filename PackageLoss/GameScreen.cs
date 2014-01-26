@@ -106,8 +106,7 @@ namespace PackageLoss
                 { "table", Game.Content.Load<Texture2D>("table")},
                 { "tv", Game.Content.Load<Texture2D>("tv")},
                 { "woodenBox", Game.Content.Load<Texture2D>("woodenBox")},
-                { "washingMachine", Game.Content.Load<Texture2D>("washingMachine")},
-                { "woodenBox", Game.Content.Load<Texture2D>("woodenBox")},            
+                { "washingMachine", Game.Content.Load<Texture2D>("washingMachine")},       
                 { "Sprinter2_ulko", Game.Content.Load<Texture2D>("Sprinter2_ulko")},
                 { "Sprinter2_luukku", Game.Content.Load<Texture2D>("Sprinter2_luukku")},
                 { "Sprinter2_rengas", Game.Content.Load<Texture2D>("Sprinter2_rengas")},
@@ -173,19 +172,19 @@ namespace PackageLoss
             carBridge.Compound.CollisionGroup = 1;
             JointFactory.CreateRevoluteJoint(World, car.Compound, carBridge.Compound, Vector2.Zero);
 
-            GenerateWorld("44444444444444444444455555555555544444444444444444444455555555555557444444444444444444444");
+            GenerateWorld("444444444444444444444555555555555744444444444444444444455555555555557444444444444444444444");
             Camera.Zoom = 1.3f;
             Camera.MoveCamera(ConvertUnits.ToSimUnits(new Vector2(-150f, 150f)));
         }
 
-        public GameObject AddTile(Texture2D texture, String name, ref Vector2 pos, float offsetY, int direction)
+        public GameObject AddTile(Texture2D texture, String name, ref Vector2 pos, int direction)
         {
             GameObject go1 = AddGameObject(texture, name);
-            go1.Compound.Position = Camera.ConvertScreenToWorld(pos + new Vector2(0, offsetY / 2f));
+            go1.Compound.Position = Camera.ConvertScreenToWorld(pos);
             go1.Compound.BodyType = BodyType.Static;
             go1.Compound.CollisionGroup = 1;
             pos.X += go1.PolygonTexture.Width;
-            pos.Y += go1.PolygonTexture.Height * direction + offsetY / 2f;
+            pos.Y += go1.PolygonTexture.Height * direction;
             return go1;
         }
 
@@ -200,34 +199,37 @@ namespace PackageLoss
          * // DO NOT START WITH ANYTHING ELSE THAN FLAT
          */
         public void GenerateWorld(string tiles)
-        {            
-            Vector2 pos = new Vector2(-200f, Game.GraphicsDevice.Viewport.Height);
+        {
+            Vector2 pos = new Vector2(-200f, Game.GraphicsDevice.Viewport.Height + tileTextures["flat01"].Height);
             GameObject lastObject = null;
+            Vector2 offset = Vector2.Zero;
             int id = 0;
             foreach (char c in tiles)
             {
                 switch (c)
                 {
                     case '1':
-                        lastObject = AddTile(tileTextures["downhillBegin"], "tile_" + id, ref pos, 0f, 1);                        
+                        lastObject = AddTile(tileTextures["downhillBegin"], "tile_" + id, ref pos, 1);                        
                         break;
                     case '2':
-                        lastObject = AddTile(tileTextures["downHill01"], "tile_" + id, ref pos, 0f, 1);
+                        lastObject = AddTile(tileTextures["downHill01"], "tile_" + id, ref pos, 1);
                         break;
                     case '3':
-                        lastObject = AddTile(tileTextures["downhillGentle"], "tile_" + id, ref pos, 0f, 1);
+                        lastObject = AddTile(tileTextures["downhillGentle"], "tile_" + id, ref pos, 1);
                         break;
                     case '4':
-                        lastObject = AddTile(tileTextures["flat01"], "tile_" + id, ref pos, 0f, 0);
+                        lastObject = AddTile(tileTextures["flat01"], "tile_" + id, ref pos, 0);
+                        offset = new Vector2(0f, -lastObject.PolygonTexture.Height);
                         break;
                     case '5':
-                        lastObject = AddTile(tileTextures["uphillGentle"], "tile_" + id, ref pos, 0f, -1);
+                        lastObject = AddTile(tileTextures["uphillGentle"], "tile_" + id, ref pos, -1);
+                        offset = Vector2.Zero;
                         break;
                     case '6':
-                        lastObject = AddTile(tileTextures["uphill01"], "tile_" + id, ref pos, 0f, -1);
+                        lastObject = AddTile(tileTextures["uphill01"], "tile_" + id, ref pos, -1);
                         break;
                     case '7':
-                        lastObject = AddTile(tileTextures["uphillEnd"], "tile_" + id, ref pos, 0f, 0);
+                        lastObject = AddTile(tileTextures["uphillEnd"], "tile_" + id, ref pos, 0);
                         break;
                     default:
                         break;
@@ -265,6 +267,7 @@ namespace PackageLoss
             }
             Game.SpriteBatch.Begin();
             Game.SpriteBatch.Draw(mouseTexture, mouseOnScreen - mouseFix, Color.White);
+            Game.SpriteBatch.Draw(Game.Character, Vector2.Zero, Color.White * 0.5f);
             Game.SpriteBatch.End();
         }
 

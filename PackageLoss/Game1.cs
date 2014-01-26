@@ -18,8 +18,8 @@ namespace PackageLoss
     {
         GraphicsDeviceManager graphics;
         internal SpriteBatch SpriteBatch;
-        int selectedScreen = 1;
-
+        int selectedScreen = 0;
+        public Texture2D Character { get; private set; }
         BaseScreen[] screens;
 
         public Game1()
@@ -108,5 +108,11 @@ namespace PackageLoss
 
             base.Draw(gameTime);
         }
+
+        public void SetCharacter(Texture2D texture)
+        {
+            this.Character = texture;
+        }
+
     }
 }
