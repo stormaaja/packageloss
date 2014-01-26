@@ -86,19 +86,26 @@ namespace PackageLoss
                 { "anvil", Game.Content.Load<Texture2D>("anvil") },
                 { "basketBall01", Game.Content.Load<Texture2D>("basketBall01")},
                 { "basketBall02", Game.Content.Load<Texture2D>("basketBall02")},
+                { "beerCrate", Game.Content.Load<Texture2D>("beerCrate")},
                 { "Cat1", Game.Content.Load<Texture2D>("Cat1")},
                 { "chainsaw", Game.Content.Load<Texture2D>("chainsaw")},
                 { "clownhat", Game.Content.Load<Texture2D>("clownhat")},
+                { "clownShoes", Game.Content.Load<Texture2D>("clownShoes")},
                 { "coffeeBrewer", Game.Content.Load<Texture2D>("coffeeBrewer")},
                 { "crystal", Game.Content.Load<Texture2D>("crystal")},
                 { "football", Game.Content.Load<Texture2D>("football")},
                 { "goo", Game.Content.Load<Texture2D>("goo")},
+                { "katana", Game.Content.Load<Texture2D>("katana")},
+                { "nunchaku", Game.Content.Load<Texture2D>("nunchaku")},
                 { "pillow01", Game.Content.Load<Texture2D>("pillow01")},
+                { "riceHat", Game.Content.Load<Texture2D>("riceHat")},
                 { "shovel02", Game.Content.Load<Texture2D>("shovel02")},
+                { "shuriken", Game.Content.Load<Texture2D>("shuriken")},
                 { "skates", Game.Content.Load<Texture2D>("skates")},
                 { "sword", Game.Content.Load<Texture2D>("sword")},
                 { "table", Game.Content.Load<Texture2D>("table")},
                 { "tv", Game.Content.Load<Texture2D>("tv")},
+                { "woodenBox", Game.Content.Load<Texture2D>("woodenBox")},
                 { "washingMachine", Game.Content.Load<Texture2D>("washingMachine")},
                 { "woodenBox", Game.Content.Load<Texture2D>("woodenBox")},            
                 { "Sprinter2_ulko", Game.Content.Load<Texture2D>("Sprinter2_ulko")},
@@ -166,7 +173,7 @@ namespace PackageLoss
             carBridge.Compound.CollisionGroup = 1;
             JointFactory.CreateRevoluteJoint(World, car.Compound, carBridge.Compound, Vector2.Zero);
 
-            GenerateWorld("444444444444444444444566666674444444444444444444445666666674444444444444444444444456666666744444412222234444441222222234444444444");
+            GenerateWorld("44444444444444444444455555555555544444444444444444444455555555555557444444444444444444444");
             Camera.Zoom = 1.3f;
             Camera.MoveCamera(ConvertUnits.ToSimUnits(new Vector2(-150f, 150f)));
         }
@@ -214,7 +221,7 @@ namespace PackageLoss
                         lastObject = AddTile(tileTextures["flat01"], "tile_" + id, ref pos, 0f, 0);
                         break;
                     case '5':
-                        lastObject = AddTile(tileTextures["uphillGentle"], "tile_" + id, ref pos, -lastObject.PolygonTexture.Height, -1);
+                        lastObject = AddTile(tileTextures["uphillGentle"], "tile_" + id, ref pos, 0f, -1);
                         break;
                     case '6':
                         lastObject = AddTile(tileTextures["uphill01"], "tile_" + id, ref pos, 0f, -1);

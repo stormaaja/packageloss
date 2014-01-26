@@ -95,5 +95,10 @@ namespace PackageLoss
         {
             
         }
+
+        public void playHit()
+        {
+
+        }
     }
 }
