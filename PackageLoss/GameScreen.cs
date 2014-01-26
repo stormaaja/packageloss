@@ -19,6 +19,7 @@ namespace PackageLoss
 {
     internal class GameScreen : BaseScreen
     {
+        public Random random = new Random();
         Texture2D[] backgrounds;
         Dictionary<string, Texture2D> tileTextures;
         Dictionary<string, Texture2D> objectTextures;
@@ -40,7 +41,8 @@ namespace PackageLoss
         Texture2D mouseTexture;
         Joint mouseJoint;
         float acceleration, maxSpeed = 100f;
-        SoundEffect soundEffectMusic;
+        Dictionary<string, SoundEffect> soundEffects;
+        GameTime lastGameTime;
 
         public Camera2D Camera { get; set; }
         public Game1 Game { get; set; }
@@ -122,6 +124,42 @@ namespace PackageLoss
                 { "uphillEnd", Game.Content.Load<Texture2D>("Tiles/uphillEnd")},
             };
 
+            soundEffects = new Dictionary<string, SoundEffect>() {
+                { "kengat1", Game.Content.Load<SoundEffect>("SoundEffects/kengat1") },
+                { "kengat2", Game.Content.Load<SoundEffect>("SoundEffects/kengat2") },
+                { "kissa1", Game.Content.Load<SoundEffect>("SoundEffects/kissa1") },
+                { "kissa2", Game.Content.Load<SoundEffect>("SoundEffects/kissa2") },
+                { "kissa3", Game.Content.Load<SoundEffect>("SoundEffects/kissa3") },
+                { "kling1", Game.Content.Load<SoundEffect>("SoundEffects/kling1") },
+                { "kling2", Game.Content.Load<SoundEffect>("SoundEffects/kling2") },
+                { "kling3", Game.Content.Load<SoundEffect>("SoundEffects/kling3") },
+                { "klink1", Game.Content.Load<SoundEffect>("SoundEffects/klink1") },
+                { "klink2", Game.Content.Load<SoundEffect>("SoundEffects/klink2") },
+                { "klink3", Game.Content.Load<SoundEffect>("SoundEffects/klink3") },
+                { "kliring1", Game.Content.Load<SoundEffect>("SoundEffects/kliring1") },
+                { "kliring2", Game.Content.Load<SoundEffect>("SoundEffects/kliring2") },
+                { "kliring3", Game.Content.Load<SoundEffect>("SoundEffects/kliring3") },
+                { "klonk1", Game.Content.Load<SoundEffect>("SoundEffects/klonk1") },
+                { "klonk2", Game.Content.Load<SoundEffect>("SoundEffects/klonk2") },
+                { "klonk3", Game.Content.Load<SoundEffect>("SoundEffects/klonk3") },
+                { "laatikko1", Game.Content.Load<SoundEffect>("SoundEffects/laatikko1") },
+                { "laatikko2", Game.Content.Load<SoundEffect>("SoundEffects/laatikko2") },
+                { "laatikko3", Game.Content.Load<SoundEffect>("SoundEffects/laatikko3") },
+                { "pahvi1", Game.Content.Load<SoundEffect>("SoundEffects/pahvi1") },
+                { "pahvi2", Game.Content.Load<SoundEffect>("SoundEffects/pahvi2") },
+                { "pahvi3", Game.Content.Load<SoundEffect>("SoundEffects/pahvi3") },
+                { "thump1", Game.Content.Load<SoundEffect>("SoundEffects/thump1") },
+                { "thump2", Game.Content.Load<SoundEffect>("SoundEffects/thump2") },
+                { "thump3", Game.Content.Load<SoundEffect>("SoundEffects/thump3") },
+                { "thunk1", Game.Content.Load<SoundEffect>("SoundEffects/thunk1") },
+                { "thunk2", Game.Content.Load<SoundEffect>("SoundEffects/thunk2") },
+                { "thunk3", Game.Content.Load<SoundEffect>("SoundEffects/thunk3") },
+                { "tyyny1", Game.Content.Load<SoundEffect>("SoundEffects/tyyny1") },
+                { "tyyny2", Game.Content.Load<SoundEffect>("SoundEffects/tyyny2") },
+            };
+
+            
+
             backgrounds = new Texture2D[] { 
                 Game.Content.Load<Texture2D>("Background/silhouetteBack"),
                 Game.Content.Load<Texture2D>("Background/silhouetteMiddle"),
@@ -136,6 +174,32 @@ namespace PackageLoss
                 x += Math.Max(textureKV.Value.Width, textureKV.Value.Height);
                 objPos = new Vector2(x % areaWidth, x / areaWidth);
             }
+
+            gameObjects["anvil"].SoundEffectHit = soundEffects["kling1"];
+            gameObjects["basketBall01"].SoundEffectHit = soundEffects["tyyny2"];
+            gameObjects["basketBall02"].SoundEffectHit = soundEffects["tyyny1"];
+            gameObjects["beerCrate"].SoundEffectHit = soundEffects["kliring1"];
+            gameObjects["Cat1"].SoundEffectHit = soundEffects["kissa1"];
+            gameObjects["chainsaw"].SoundEffectHit = soundEffects["tyyny1"];
+            gameObjects["clownhat"].SoundEffectHit = soundEffects["tyyny1"];
+            gameObjects["clownShoes"].SoundEffectHit = soundEffects["kengat2"];
+            gameObjects["coffeeBrewer"].SoundEffectHit = soundEffects["klonk3"];
+            gameObjects["crystal"].SoundEffectHit = soundEffects["kliring1"];
+            gameObjects["football"].SoundEffectHit = soundEffects["tyyny1"];
+            gameObjects["goo"].SoundEffectHit = soundEffects["tyyny1"];
+            gameObjects["katana"      ].SoundEffectHit = soundEffects["kling1"];
+            gameObjects["nunchaku"].SoundEffectHit = soundEffects["kling2"];
+            gameObjects["pillow01"    ].SoundEffectHit = soundEffects["tyyny1"];
+            gameObjects["riceHat"     ].SoundEffectHit = soundEffects["tyyny1"];
+            gameObjects["shovel02"    ].SoundEffectHit = soundEffects["klonk3"];
+            gameObjects["shuriken"    ].SoundEffectHit = soundEffects["kengat2"];
+            gameObjects["skates"].SoundEffectHit = soundEffects["kengat2"];
+            gameObjects["sword"       ].SoundEffectHit = soundEffects["klink2"];
+            gameObjects["table"       ].SoundEffectHit = soundEffects["laatikko2"];
+            gameObjects["tv"          ].SoundEffectHit = soundEffects["laatikko3"];
+            gameObjects["woodenBox"   ].SoundEffectHit = soundEffects["laatikko2"];
+            gameObjects["washingMachine"].SoundEffectHit = soundEffects["laatikko3"];
+
             mouseMiddle = Mouse.GetState().ScrollWheelValue;
             car = FindGameObject("Sprinter2_ulko");
             Vector2 carStart = new Vector2(Game.Window.ClientBounds.Width / 2f + 130f, Game.GraphicsDevice.Viewport.Height - tileTextures["flat01"].Height - 30f);
@@ -250,6 +314,14 @@ namespace PackageLoss
 
         bool Compound_OnCollision(Fixture fixtureA, Fixture fixtureB, FarseerPhysics.Dynamics.Contacts.Contact contact)
         {
+            if (fixtureA.Body.LinearVelocity.Length() > 1f)
+            {
+                FindGameObject(fixtureA.Body).PlayHit(lastGameTime);                
+            }
+            if (fixtureB.Body.LinearVelocity.Length() > 1f)
+            {
+                FindGameObject(fixtureB.Body).PlayHit(lastGameTime);
+            }
             return true;
         }
 
@@ -282,7 +354,8 @@ namespace PackageLoss
         }
 
         public void Update(GameTime gameTime)
-        {            
+        {
+            lastGameTime = gameTime;
             World.Step(Math.Min((float)gameTime.ElapsedGameTime.TotalSeconds, (1f / 30f)));
             foreach (KeyValuePair<string, GameObject> gameObjectKV in gameObjects)
             {

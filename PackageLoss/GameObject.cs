@@ -5,6 +5,7 @@ using FarseerPhysics.Common.PolygonManipulation;
 using FarseerPhysics.Dynamics;
 using FarseerPhysics.Factories;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -15,9 +16,11 @@ namespace PackageLoss
 {
     internal class GameObject
     {
+        public SoundEffect SoundEffectHit { get; set; }
         internal Body Compound { get; set; }
         public String Name { get; set; }
         public Texture2D PolygonTexture { get; set; }
+        TimeSpan lastHitSound = TimeSpan.FromSeconds(0);
         World world;
         GameScreen gameScreen;
 
@@ -96,8 +99,14 @@ namespace PackageLoss
             
         }
 
-        public void playHit()
+        public void PlayHit(GameTime gameTime)
         {
+            if (SoundEffectHit != null && (gameTime.TotalGameTime - lastHitSound).TotalSeconds > 0.2)
+            {
+                SoundEffectHit.Play(1f, 1.2f - gameScreen.random.Next(40) / 100f, 0f);
+                lastHitSound = gameTime.TotalGameTime;
+            }
+
 
         }
     }
