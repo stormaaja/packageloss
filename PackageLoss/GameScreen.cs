@@ -18,6 +18,7 @@ namespace PackageLoss
 {
     internal class GameScreen : BaseScreen
     {
+        Texture2D[] backgrounds;
         Dictionary<string, Texture2D> tileTextures;
         Dictionary<string, Texture2D> objectTextures;
         GameObject movingObject = null, tire1, tire2;
@@ -27,8 +28,7 @@ namespace PackageLoss
         protected World World;
         WheelJoint frontWheelJoint, rearWheelJoint;
         int mouseMiddle;
-        Body HiddenBody;
-        Texture2D background;
+        Body HiddenBody;        
         Rectangle bgRectangle;
         Dictionary<string, GameObject> gameObjects;
         //Body bottom;
@@ -73,7 +73,6 @@ namespace PackageLoss
         public void LoadContent()
         {
             bgRectangle = new Rectangle(0, 0, Game.Window.ClientBounds.Width, Game.Window.ClientBounds.Height);
-            background = Game.Content.Load<Texture2D>("background");
             gameObjects = new Dictionary<string, GameObject>();
             World = new World(new Vector2(0f, 9.82f));
             mouseTexture = Game.Content.Load<Texture2D>("Mouse-cursor-hand-pointer");
@@ -114,14 +113,19 @@ namespace PackageLoss
                 { "uphillBegin", Game.Content.Load<Texture2D>("Tiles/uphillBegin")},
                 { "uphillEnd", Game.Content.Load<Texture2D>("Tiles/uphillEnd")},
             };
-            
+
+            backgrounds = new Texture2D[] { 
+                Game.Content.Load<Texture2D>("Background/silhouetteBack"),
+                Game.Content.Load<Texture2D>("Background/silhouetteMiddle"),
+                Game.Content.Load<Texture2D>("Background/silhouetteFront"),
+            };
             float screenWidth = ConvertUnits.ToSimUnits(Game.GraphicsDevice.Viewport.Height), screenHeight = ConvertUnits.ToSimUnits(Game.GraphicsDevice.Viewport.Width);
             float areaWidth = Game.GraphicsDevice.Viewport.Width / 2f, x = 0f;
             Vector2 objPos = new Vector2(0f, Game.GraphicsDevice.Viewport.Height - tileTextures["flat01"].Height);
             foreach (KeyValuePair<string, Texture2D> textureKV in objectTextures)
             {
                 AddGameObject(textureKV.Value).Compound.Position = Camera.ConvertScreenToWorld(objPos);
-                x += textureKV.Value.Width;
+                x += Math.Max(textureKV.Value.Width, textureKV.Value.Height);
                 objPos = new Vector2(x % areaWidth, x / areaWidth);
             }
             mouseMiddle = Mouse.GetState().ScrollWheelValue;
@@ -168,10 +172,10 @@ namespace PackageLoss
         public GameObject AddTile(Texture2D texture, String name, ref Vector2 pos, int direction)
         {
             GameObject go1 = AddGameObject(texture, name);
-            go1.Compound.Position = pos;
+            go1.Compound.Position = Camera.ConvertScreenToWorld(pos);
             go1.Compound.BodyType = BodyType.Static;
             go1.Compound.CollisionGroup = 1;
-            pos += ConvertUnits.ToSimUnits(new Vector2(go1.PolygonTexture.Width, go1.PolygonTexture.Height * direction));
+            pos += new Vector2(go1.PolygonTexture.Width, go1.PolygonTexture.Height * direction);
             return go1;
         }
 
@@ -186,7 +190,7 @@ namespace PackageLoss
          */
         public void GenerateWorld(string tiles)
         {
-            Vector2 pos = Camera.ConvertScreenToWorld(new Vector2(-200f, Game.GraphicsDevice.Viewport.Height));
+            Vector2 pos = new Vector2(-200f, Game.GraphicsDevice.Viewport.Height);
             int id = 0;
             foreach (char c in tiles)
             {
@@ -238,7 +242,9 @@ namespace PackageLoss
         public void Draw(GameTime gameTime)
         {
             Game.SpriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.Opaque, null, DepthStencilState.Default, RasterizerState.CullNone);
-            Game.SpriteBatch.Draw(background, Vector2.Zero, bgRectangle, Color.White, 0, Vector2.Zero, 4.0f, SpriteEffects.None, 0);
+            Game.SpriteBatch.Draw(backgrounds[0], Vector2.Zero, bgRectangle, Color.White, 0, Vector2.Zero, 4.0f, SpriteEffects.None, 0);
+            Game.SpriteBatch.Draw(backgrounds[1], Vector2.Zero, bgRectangle, Color.White, 0, Vector2.Zero, 4.0f, SpriteEffects.None, 0);
+            Game.SpriteBatch.Draw(backgrounds[2], Vector2.Zero, bgRectangle, Color.White, 0, Vector2.Zero, 4.0f, SpriteEffects.None, 0);
             Game.SpriteBatch.End();
 
             foreach (KeyValuePair<string,GameObject> gameObjectKV in gameObjects)
