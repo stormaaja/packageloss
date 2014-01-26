@@ -9,12 +9,12 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="239.99998"
-   height="240"
+   width="240"
+   height="120"
    id="svg4223"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="uphill01.svg">
+   sodipodi:docname="flat01.svg">
   <defs
      id="defs4225" />
   <sodipodi:namedview
@@ -47,7 +47,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -55,7 +55,7 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-576.09924,-264.56127)">
+     transform="translate(-576.09924,-384.56127)">
     <path
        style="fill:#6c6753;fill-opacity:1;fill-rule:evenodd;stroke:none"
        d="m 576.09924,384.56127 119.99997,0 120.00003,0 0,120 -240,0 z"
