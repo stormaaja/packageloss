@@ -17,32 +17,8 @@ namespace PackageLoss
 {
     internal class GameScreen : BaseScreen
     {
-        readonly String[] textureFilenames = new String[] {
-            "anvil",
-            "basketBall01",
-            "basketBall02",
-            "Cat1",
-            "chainsaw",
-            "clownhat",
-            "coffeeBrewer",
-            "crystal",
-            "football",
-            "goo",
-            "pillow01",
-            "shovel02",
-            "skates",
-            "sword",
-            "table",
-            "tv",
-            "washingMachine",
-            "woodenBox",            
-            "Sprinter2_ulko",
-            //"Sprinter2_ulko_alfa",
-            "Sprinter2_luukku",
-            "Sprinter2_rengas",
-            "bottom",
-            //"Mouse-cursor-hand-pointer"
-        };
+        Dictionary<string, Texture2D> tileTextures;
+        Dictionary<string, Texture2D> objectTextures;
         GameObject movingObject = null, tire1, tire2;
         Vector2 moveSpeed, axel;
         Vector2 mouseInWorld, mouseOnScreen, mouseFix = new Vector2(20, 16);
@@ -51,9 +27,8 @@ namespace PackageLoss
         int mouseMiddle;
         Body HiddenBody;
         Texture2D background;
-        Texture2D[] textures;
         Rectangle bgRectangle;
-        List<GameObject> gameObjects;
+        Dictionary<string, GameObject> gameObjects;
         //Body bottom;
         readonly float minScale = 0.4f, maxScale = 1.0f, carPower = 0.3f, minZoom = 0.7f;
         bool drivingState = false;
@@ -96,24 +71,45 @@ namespace PackageLoss
         {
             bgRectangle = new Rectangle(0, 0, Game.Window.ClientBounds.Width, Game.Window.ClientBounds.Height);
             background = Game.Content.Load<Texture2D>("background");
-            gameObjects = new List<GameObject>();
+            gameObjects = new Dictionary<string, GameObject>();
             World = new World(new Vector2(0f, 9.82f));
             mouseTexture = Game.Content.Load<Texture2D>("Mouse-cursor-hand-pointer");
             Camera = new Camera2D(Game.GraphicsDevice);
             
             HiddenBody = BodyFactory.CreateBody(World, Vector2.Zero);
             //load texture that will represent the physics body
-            textures = new Texture2D[textureFilenames.Length];
-            for (int i = 0; i < textureFilenames.Length; i++)
-            {
-                textures[i] = Game.Content.Load<Texture2D>(textureFilenames[i]);
-                textures[i].Name = textureFilenames[i]; // XNA hack
-            }
+            objectTextures = new Dictionary<string, Texture2D> {
+                { "anvil", Game.Content.Load<Texture2D>("anvil") },
+                { "basketBall01", Game.Content.Load<Texture2D>("basketBall01")},
+                { "basketBall02", Game.Content.Load<Texture2D>("basketBall02")},
+                { "Cat1", Game.Content.Load<Texture2D>("Cat1")},
+                { "chainsaw", Game.Content.Load<Texture2D>("chainsaw")},
+                { "clownhat", Game.Content.Load<Texture2D>("clownhat")},
+                { "coffeeBrewer", Game.Content.Load<Texture2D>("coffeeBrewer")},
+                { "crystal", Game.Content.Load<Texture2D>("crystal")},
+                { "football", Game.Content.Load<Texture2D>("football")},
+                { "goo", Game.Content.Load<Texture2D>("goo")},
+                { "pillow01", Game.Content.Load<Texture2D>("pillow01")},
+                { "shovel02", Game.Content.Load<Texture2D>("shovel02")},
+                { "skates", Game.Content.Load<Texture2D>("skates")},
+                { "sword", Game.Content.Load<Texture2D>("sword")},
+                { "table", Game.Content.Load<Texture2D>("table")},
+                { "tv", Game.Content.Load<Texture2D>("tv")},
+                { "washingMachine", Game.Content.Load<Texture2D>("washingMachine")},
+                { "woodenBox", Game.Content.Load<Texture2D>("woodenBox")},            
+                { "Sprinter2_ulko", Game.Content.Load<Texture2D>("Sprinter2_ulko")},
+                { "Sprinter2_luukku", Game.Content.Load<Texture2D>("Sprinter2_luukku")},
+                { "Sprinter2_rengas", Game.Content.Load<Texture2D>("Sprinter2_rengas")},
+                { "bottom", Game.Content.Load<Texture2D>("bottom")},
+            };
+
+
+            
             float screenWidth = ConvertUnits.ToSimUnits(Game.GraphicsDevice.Viewport.Height), screenHeight = ConvertUnits.ToSimUnits(Game.GraphicsDevice.Viewport.Width);
             Random rand = new Random();
-            foreach (Texture2D texture in textures)
+            foreach (KeyValuePair<string, Texture2D> textureKV in objectTextures)
             {
-                    AddGameObject(texture).Compound.Position = new Vector2((float)(rand.NextDouble() - 0.5) * screenWidth, (float)(rand.NextDouble() - 0.5) * screenHeight);
+                AddGameObject(textureKV.Value).Compound.Position = new Vector2((float)(rand.NextDouble() - 0.5) * screenWidth, (float)(rand.NextDouble() - 0.5) * screenHeight);
             }
             mouseMiddle = Mouse.GetState().ScrollWheelValue;
             //bottom = BodyFactory.CreateRectangle(World, ConvertUnits.ToSimUnits(Game.Window.ClientBounds.Width * 10.0f), ConvertUnits.ToSimUnits(20f), 10.0f);
@@ -141,7 +137,7 @@ namespace PackageLoss
             tire1.Compound.CollisionGroup = 1;
             JointFactory.CreateRevoluteJoint(World, car.Compound, tire1.Compound, Vector2.Zero);
 
-            tire2 = AddGameObject(tire1.PolygonTexture);
+            tire2 = AddGameObject(tire1.PolygonTexture, "Sprinter2_rengas_2");
             tire2.Compound.Friction = 0.9f;
             tire2.Compound.Mass = 20f;
             Vector2 tireAxel2 = new Vector2(-tireAxel.X - 100f, tireAxel.Y);
@@ -221,11 +217,8 @@ namespace PackageLoss
         {
             GameObject gameObject = new GameObject(this, texture, World);
             gameObject.Compound.OnCollision += Compound_OnCollision;
-            gameObjects.Add(gameObject);
-            if (name == null)
-                gameObject.Name = texture.Name;
-            else
-                gameObject.Name = name;
+            gameObject.Name = name == null ? texture.Name : name;
+            gameObjects.Add(gameObject.Name, gameObject);
             gameObject.Compound.CollisionGroup = 2;
             return gameObject;
         }
@@ -241,9 +234,9 @@ namespace PackageLoss
             Game.SpriteBatch.Draw(background, Vector2.Zero, bgRectangle, Color.White, 0, Vector2.Zero, 4.0f, SpriteEffects.None, 0);
             Game.SpriteBatch.End();
 
-            foreach (GameObject gameObject in gameObjects)
+            foreach (KeyValuePair<string,GameObject> gameObjectKV in gameObjects)
             {
-                gameObject.Draw(Game.SpriteBatch, Camera);
+                gameObjectKV.Value.Draw(Game.SpriteBatch, Camera);
             }
             Game.SpriteBatch.Begin();
             Game.SpriteBatch.Draw(mouseTexture, mouseOnScreen - mouseFix, Color.White);
@@ -263,10 +256,10 @@ namespace PackageLoss
         public void Update(GameTime gameTime)
         {            
             World.Step(Math.Min((float)gameTime.ElapsedGameTime.TotalSeconds, (1f / 30f)));
-            foreach (GameObject gameObject in gameObjects)
+            foreach (KeyValuePair<string, GameObject> gameObjectKV in gameObjects)
             {
-                gameObject.SetScale(CalculateScale(gameObject.Compound.Position));
-                gameObject.Update(gameTime);
+                gameObjectKV.Value.SetScale(CalculateScale(gameObjectKV.Value.Compound.Position));
+                gameObjectKV.Value.Update(gameTime);
             }
             if (drivingState && Camera.Zoom > minZoom)
                 Camera.Zoom -= 0.01f;
@@ -333,22 +326,18 @@ namespace PackageLoss
 
         internal GameObject FindGameObject(Body body)
         {
-            foreach (GameObject gameObject in gameObjects)
+            foreach (KeyValuePair<string, GameObject> gameObjectKV in gameObjects)
             {
-                if (gameObject.Compound == body)
-                    return gameObject;
+                if (gameObjectKV.Value.Compound == body)
+                    return gameObjectKV.Value;
             }
             return null;
         }
 
         internal GameObject FindGameObject(String name)
         {
-            foreach (GameObject gameObject in gameObjects)
-            {
-                if (gameObject.Name.Equals(name))
-                    return gameObject;
-            }
-            return null;
+            
+            return gameObjects[name];
         }
 
         public void HandleKeyboard(KeyboardState keyboardState, GameTime gameTime)
