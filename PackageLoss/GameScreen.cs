@@ -27,6 +27,7 @@ namespace PackageLoss
         Vector2 moveSpeed, axel;
         Vector2 mouseInWorld, mouseOnScreen, mouseFix = new Vector2(20, 16);
         Vector2 moveDelta;
+        Vector2 scorePosition = new Vector2(200f, 20f);
         protected World World;
         WheelJoint frontWheelJoint, rearWheelJoint;
         int mouseMiddle;
@@ -42,7 +43,9 @@ namespace PackageLoss
         Joint mouseJoint;
         float acceleration, maxSpeed = 100f;
         Dictionary<string, SoundEffect> soundEffects;
+        List<GameObject> scores = new List<GameObject>();
         GameTime lastGameTime;
+        SpriteFont font;
 
         public Camera2D Camera { get; set; }
         public Game1 Game { get; set; }
@@ -122,6 +125,7 @@ namespace PackageLoss
                 { "uphillGentle", Game.Content.Load<Texture2D>("Tiles/uphillGentle")},
                 { "uphill01", Game.Content.Load<Texture2D>("Tiles/uphill01")},                
                 { "uphillEnd", Game.Content.Load<Texture2D>("Tiles/uphillEnd")},
+                { "kerrostalo", Game.Content.Load<Texture2D>("Tiles/kerrostalo")},
             };
 
             soundEffects = new Dictionary<string, SoundEffect>() {
@@ -157,7 +161,7 @@ namespace PackageLoss
                 { "tyyny1", Game.Content.Load<SoundEffect>("SoundEffects/tyyny1") },
                 { "tyyny2", Game.Content.Load<SoundEffect>("SoundEffects/tyyny2") },
             };
-
+            font = Game.Content.Load<SpriteFont>("Segoe UI Mono");
             
 
             backgrounds = new Texture2D[] { 
@@ -236,7 +240,7 @@ namespace PackageLoss
             carBridge.Compound.CollisionGroup = 1;
             JointFactory.CreateRevoluteJoint(World, car.Compound, carBridge.Compound, Vector2.Zero);
 
-            GenerateWorld("444444444444444444444555555555555744444444444444444444455555555555557444444444444444444444");
+            GenerateWorld("4444444444444444444445555555555557444444444444444444444555555555555574444444444444444444448444444");
             Camera.Zoom = 1.3f;
             Camera.MoveCamera(ConvertUnits.ToSimUnits(new Vector2(-150f, 150f)));
         }
@@ -260,6 +264,7 @@ namespace PackageLoss
          * 5: uphillGentle
          * 6: uphill01
          * 7: uphillEnd
+         * 8: finish
          * // DO NOT START WITH ANYTHING ELSE THAN FLAT
          */
         public void GenerateWorld(string tiles)
@@ -295,6 +300,11 @@ namespace PackageLoss
                     case '7':
                         lastObject = AddTile(tileTextures["uphillEnd"], "tile_" + id, ref pos, 0);
                         break;
+                    case '8':
+                        lastObject = AddTile(tileTextures["kerrostalo"], "finish_" + id, ref pos, 0);
+                        lastObject.Name = "Finish";
+                        lastObject.Compound.CollisionGroup = 8;
+                        break;
                     default:
                         break;
                 }
@@ -322,6 +332,13 @@ namespace PackageLoss
             {
                 FindGameObject(fixtureB.Body).PlayHit(lastGameTime);
             }
+            if (fixtureA.CollisionGroup == 8 && fixtureB.CollisionGroup != 8)
+            {
+                GameObject go = FindGameObject(fixtureB.Body);
+                if (!scores.Contains(go))
+                    scores.Add(go);
+                return false;
+            }
             return true;
         }
 
@@ -340,6 +357,7 @@ namespace PackageLoss
             Game.SpriteBatch.Begin();
             Game.SpriteBatch.Draw(mouseTexture, mouseOnScreen - mouseFix, Color.White);
             Game.SpriteBatch.Draw(Game.Character, Vector2.Zero, Color.White * 0.5f);
+            Game.SpriteBatch.DrawString(font, "" + scores.Count * 10, scorePosition, Color.White);
             Game.SpriteBatch.End();
         }
 

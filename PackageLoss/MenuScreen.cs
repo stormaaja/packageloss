@@ -75,8 +75,7 @@ namespace PackageLoss
                 new TextureRect() { Texture = Game.Content.Load<Texture2D>("Characters/yllatyskyykky"), Rectangle = new Rectangle(startX + 800, startY, 200, 200) },
             };
             menuEntriesPosition = new Vector2(100, 100);
-            //Song song = Game.Content.Load<Song>("Music/jatsahdus");
-            //MediaPlayer.Play(song);
+            //menuMusic = Game.Content.Load<Song>("Music/jatsahdus");            
         }
 
         internal void DrawTexts()
