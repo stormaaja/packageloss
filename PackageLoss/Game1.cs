@@ -20,7 +20,7 @@ namespace PackageLoss
         internal SpriteBatch SpriteBatch;
         int selectedScreen = 0;
 
-        BaseScreen[] screens = new BaseScreen[2];
+        BaseScreen[] screens;
 
         public Game1()
             : base()
@@ -45,8 +45,10 @@ namespace PackageLoss
         /// </summary>
         protected override void Initialize()
         {
-            screens[0] = new GameScreen(this);
-            screens[1] = new MenuScreen(this);
+            screens = new BaseScreen[] {
+                new MenuScreen(this),
+                new GameScreen(this),            
+            };
             base.Initialize();
         }
 
